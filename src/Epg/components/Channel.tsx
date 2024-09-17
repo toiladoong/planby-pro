@@ -9,6 +9,7 @@ import { ChannelStyled } from "../styles";
 interface ChannelProps<T> {
   channel: T;
   onClick?: (v: ChannelWithPosition) => void;
+  logoChannelMapKey?: string
 }
 
 const { ChannelBox, ChannelLogo } = ChannelStyled;
@@ -16,9 +17,10 @@ const { ChannelBox, ChannelLogo } = ChannelStyled;
 export function Channel<T extends ChannelWithPosition>({
   channel,
   onClick,
+  logoChannelMapKey = 'logo',
   ...rest
 }: ChannelProps<T>) {
-  const { position, logo } = channel;
+  const { position } = channel;
   return (
     <ChannelBox
       data-testid="sidebar-item"
@@ -26,7 +28,7 @@ export function Channel<T extends ChannelWithPosition>({
       {...position}
       {...rest}
     >
-      <ChannelLogo src={logo} alt="Logo" />
+      <ChannelLogo src={channel[logoChannelMapKey]} alt="Logo"/>
     </ChannelBox>
   );
 }

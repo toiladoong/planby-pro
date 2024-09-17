@@ -36,16 +36,36 @@ export const getHourWidth = (dayWidth: number) => dayWidth / HOURS_IN_DAY;
 export const getDate = (date: DateTime) => new Date(date);
 
 const abs = (num: number) => Math.abs(num);
+
 interface DayWidth {
   dayWidth: number;
   startDate: DateTime;
   endDate: DateTime;
+  maxLength?: number;
+  itemWidth?: number;
 }
+
 export const getDayWidthResources = ({
   dayWidth,
   startDate,
   endDate,
+  maxLength,
+  itemWidth
 }: DayWidth) => {
+  if (itemWidth) {
+    if (!maxLength) {
+      return {
+        dayWidth,
+        hourWidth: 0
+      }
+    }
+
+    return {
+      dayWidth: itemWidth * maxLength,
+      hourWidth: 0
+    }
+  }
+
   const startDateTime = getDate(startDate);
   const endDateTime = getDate(endDate);
 

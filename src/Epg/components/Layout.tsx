@@ -42,6 +42,8 @@ interface LayoutProps {
   offsetStartHoursRange: number;
   sidebarWidth: number;
   itemHeight: number;
+  channelMapKey?: string;
+  logoChannelMapKey?: string;
   onScroll: (
     e: React.UIEvent<HTMLDivElement, UIEvent> & { target: Element }
   ) => void;
@@ -50,6 +52,7 @@ interface LayoutProps {
   isSidebar?: boolean;
   isTimeline?: boolean;
   isLine?: boolean;
+  isRow?: boolean;
   isProgramVisible: (position: Position) => boolean;
   isChannelVisible: (position: Pick<Position, "top">) => boolean;
   renderProgram?: (v: {
@@ -66,7 +69,7 @@ const { ScrollBox, Content } = EpgStyled;
 export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
   (props, scrollBoxRef) => {
     const { channels, programs, startDate, endDate, scrollY } = props;
-    const { dayWidth, hourWidth, sidebarWidth, itemHeight } = props;
+    const { dayWidth, hourWidth, sidebarWidth, itemHeight, channelMapKey = 'uuid', logoChannelMapKey } = props;
     const { numberOfHoursInDay, offsetStartHoursRange } = props;
     const {
       isSidebar = true,
@@ -74,6 +77,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
       isLine = true,
       isBaseTimeFormat = false,
       isRTL = false,
+      // isRow = false,
     } = props;
 
     const {
@@ -146,6 +150,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
             startDate={startDate}
             endDate={endDate}
             height={contentHeight}
+            top={isTimeline ? 64 : 0}
           />
         )}
         {isTimeline && renderTopbar()}
@@ -158,6 +163,8 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
             channels={channels as ChannelWithPosition[]}
             scrollY={scrollY}
             renderChannel={renderChannel}
+            channelMapKey={channelMapKey}
+            logoChannelMapKey={logoChannelMapKey}
           />
         )}
         <Content

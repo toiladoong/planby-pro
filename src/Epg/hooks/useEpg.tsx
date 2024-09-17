@@ -44,12 +44,20 @@ interface useEpgProps {
   isTimeline?: boolean;
   isRTL?: boolean;
   isLine?: boolean;
+  isRow?: boolean;
   theme?: Theme;
   globalStyles?: string;
   dayWidth?: number;
   sidebarWidth?: number;
+  itemWidth?: number;
   itemHeight?: number;
   itemOverscan?: number;
+  channelMapKey?: string;
+  logoChannelMapKey?: string;
+  programChannelMapKey?: string;
+  sinceMapKey?: string;
+  tillMapKey?: string;
+  maxLength?: number;
 }
 
 const defaultStartDateTime = formatTime(startOfToday());
@@ -64,15 +72,28 @@ export function useEpg({
   isSidebar = true,
   isTimeline = true,
   isLine = true,
+  isRow = false,
   theme: customTheme,
   globalStyles,
   dayWidth: customDayWidth = DAY_WIDTH,
   sidebarWidth = SIDEBAR_WIDTH,
+  itemWidth,
   itemHeight = ITEM_HEIGHT,
   itemOverscan = ITEM_OVERSCAN,
   width,
   height,
+  maxLength,
+  channelMapKey,
+  logoChannelMapKey,
+  programChannelMapKey,
+  sinceMapKey,
+  tillMapKey
 }: useEpgProps) {
+  if (itemWidth) {
+    isTimeline = false;
+    isLine = false;
+  }
+
   // Get converted start and end dates
   const { startDate, endDate } = getTimeRangeDates(
     startDateInput,
@@ -82,7 +103,7 @@ export function useEpg({
   // Get day and hour width of the day
   const { hourWidth, dayWidth, ...dayWidthResourcesProps } = React.useMemo(
     () =>
-      getDayWidthResources({ dayWidth: customDayWidth, startDate, endDate }),
+      getDayWidthResources({ dayWidth: customDayWidth, startDate, endDate, maxLength, itemWidth }),
     [customDayWidth, startDate, endDate]
   );
 
@@ -120,11 +141,19 @@ export function useEpg({
         channels,
         startDate: startDateTime,
         endDate: endDateTime,
+        itemWidth,
         itemHeight,
         hourWidth,
+        channelMapKey,
+        programChannelMapKey,
+        sinceMapKey,
+        tillMapKey,
+        isRow
       }),
-    [epg, channels, startDateTime, endDateTime, itemHeight, hourWidth]
+    [epg, channels, startDateTime, endDateTime, itemWidth, itemHeight, hourWidth]
   );
+
+  // console.log('programs', programs)
 
   const theme: Theme = customTheme || defaultTheme;
 
@@ -175,10 +204,13 @@ export function useEpg({
     isLine,
     isProgramVisible,
     isChannelVisible,
+    isRow,
     dayWidth,
     hourWidth,
     sidebarWidth,
     itemHeight,
+    channelMapKey,
+    logoChannelMapKey,
     ...dayWidthResourcesProps,
     ref: scrollBoxRef,
   });

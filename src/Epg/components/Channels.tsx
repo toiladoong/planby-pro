@@ -16,19 +16,21 @@ interface ChannelsProps {
   scrollY: number;
   sidebarWidth: number;
   renderChannel?: (v: { channel: ChannelWithPosition }) => React.ReactNode;
+  channelMapKey?: string
+  logoChannelMapKey?: string
 }
 
 const { Box } = ChannelsStyled;
 
 export function Channels(props: ChannelsProps) {
-  const { channels, scrollY, sidebarWidth, renderChannel } = props;
+  const { channels, scrollY, sidebarWidth, renderChannel, channelMapKey = 'uuid', logoChannelMapKey } = props;
   const { isRTL, isTimeline, isChannelVisible } = props;
 
   const renderChannels = (channel: ChannelWithPosition) => {
     const isVisible = isChannelVisible(channel.position);
     if (isVisible) {
       if (renderChannel) return renderChannel({ channel });
-      return <Channel key={channel.uuid} channel={channel} />;
+      return <Channel key={channel[channelMapKey]} channel={channel} logoChannelMapKey={logoChannelMapKey}/>;
     }
     return null;
   };

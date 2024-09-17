@@ -1,7 +1,7 @@
-import { differenceInMinutes, getTime } from "date-fns";
+import { differenceInMinutes, getTime, endOfDay } from "date-fns";
 
 // Import interfaces
-import { Channel, Program } from "./interfaces";
+import { Channel, Program, ProgramPosition } from "./interfaces";
 
 // Import types
 import { ProgramWithPosition, Position, DateTime } from "./types";
@@ -26,8 +26,14 @@ export const getPositionX = (
   till: DateTime,
   startDate: DateTime,
   endDate: DateTime,
-  hourWidth: number
+  hourWidth: number,
+  itemIndex?: number,
+  itemWidth?: number,
 ) => {
+  if (itemWidth && (itemIndex || itemIndex === 0)) {
+    return itemWidth * itemIndex;
+  }
+
   const isTomorrow = getTime(getDate(till)) > getTime(getDate(endDate));
   const isYesterday = getTime(getDate(since)) < getTime(getDate(startDate));
 
@@ -79,36 +85,69 @@ export const getChannelPosition = (
   return position;
 };
 // -------- Program position in the Epg --------
-export const getProgramPosition = (
-  program: Program,
-  channelIndex: number,
-  itemHeight: number,
-  hourWidth: number,
-  startDate: DateTime,
-  endDate: DateTime
-) => {
+export const getProgramPosition = ({
+  program,
+  nextProgram,
+  channelIndex,
+  itemIndex,
+  itemWidth,
+  itemHeight,
+  hourWidth,
+  startDate,
+  endDate,
+  sinceMapKey = 'since',
+  tillMapKey = 'till',
+}: ProgramPosition) => {
+  let since = program[sinceMapKey];
+  let till = program[tillMapKey];
+
+  if (!till && !nextProgram) {
+    till = endOfDay(new Date(since));
+  }
+
   const item = {
-    ...program,
-    since: formatTime(program.since),
-    till: formatTime(program.till),
+    ...program
   };
+
+  if (program.isEmpty) {
+    if (!itemWidth) {
+      itemWidth = 200
+    }
+
+    const position = {
+      width: itemWidth,
+      height: itemHeight,
+      top: itemHeight * channelIndex,
+      left: 0,
+      edgeEnd: itemWidth,
+    };
+
+    return { position, data: item };
+  } else {
+    item.since = formatTime(since);
+    item.till = formatTime(till);
+  }
+
   const isYesterday = isYesterdayTime(item.since, startDate);
 
-  let width = getPositionX(
+  let width = itemWidth || getPositionX(
     item.since,
     item.till,
     startDate,
     endDate,
     hourWidth
   );
+
   const top = itemHeight * channelIndex;
-  let left = getPositionX(startDate, item.since, startDate, endDate, hourWidth);
+  let left = getPositionX(startDate, item.since, startDate, endDate, hourWidth, itemIndex, itemWidth);
   const edgeEnd = getPositionX(
     startDate,
     item.till,
     startDate,
     endDate,
-    hourWidth
+    hourWidth,
+    itemIndex + 1,
+    itemWidth
   );
 
   if (isYesterday) left = 0;
@@ -122,6 +161,7 @@ export const getProgramPosition = (
     left,
     edgeEnd,
   };
+
   return { position, data: item };
 };
 
@@ -131,30 +171,61 @@ interface ConvertedPrograms {
   channels: Channel[];
   startDate: DateTime;
   endDate: DateTime;
+  itemWidth?: number;
   itemHeight: number;
   hourWidth: number;
+  channelMapKey?: string;
+  programChannelMapKey?: string;
+  sinceMapKey?: string;
+  tillMapKey?: string;
+  isRow?: boolean;
 }
+
 export const getConvertedPrograms = ({
   data,
   channels,
   startDate,
   endDate,
+  itemWidth,
   itemHeight,
   hourWidth,
-}: ConvertedPrograms) =>
-  data.map((next) => {
+  channelMapKey = 'uuid',
+  programChannelMapKey = 'channelUuid',
+  sinceMapKey,
+  tillMapKey,
+  // isRow
+}: ConvertedPrograms) => {
+  let itemIndex = 0;
+
+  return data.map((program, index) => {
     const channelIndex = channels.findIndex(
-      ({ uuid }) => uuid === next.channelUuid
+      (channel) => channel[channelMapKey] === program[programChannelMapKey]
     );
-    return getProgramPosition(
-      next,
+
+    const prevProgram = data[index - 1];
+    const nextProgram = data[index + 1];
+    const isPrevSameChannel = prevProgram && (prevProgram[programChannelMapKey] === program[programChannelMapKey]);
+    const isNextSameChannel = nextProgram && (nextProgram[programChannelMapKey] === program[programChannelMapKey]);
+
+    itemIndex = isPrevSameChannel ? itemIndex + 1 : 0;
+
+    // console.log('itemIndex', isPrevSameChannel, prevProgram, itemIndex)
+
+    return getProgramPosition({
+      program,
+      nextProgram: isNextSameChannel ? nextProgram : undefined,
       channelIndex,
+      itemIndex,
+      itemWidth,
       itemHeight,
       hourWidth,
       startDate,
-      endDate
-    );
-  }, [] as ProgramWithPosition[]);
+      endDate,
+      sinceMapKey,
+      tillMapKey,
+    });
+  }, [] as ProgramWithPosition[])
+};
 
 // -------- Converted channels with position data --------
 export const getConvertedChannels = (channels: Channel[], itemHeight: number) =>

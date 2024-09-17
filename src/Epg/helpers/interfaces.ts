@@ -1,3 +1,5 @@
+import { DateTime } from './types';
+
 export interface Program {
   channelUuid: string;
   id: string;
@@ -6,12 +8,28 @@ export interface Program {
   since: string | number | Date;
   till: string | number | Date;
   image: string;
+  isEmpty?: boolean;
   [key: string]: any;
+}
+
+export interface ProgramPosition {
+  program: Program,
+  nextProgram?: Program,
+  channelIndex: number,
+  itemIndex: number,
+  itemWidth?: number,
+  itemHeight: number,
+  hourWidth: number,
+  startDate: DateTime,
+  endDate: DateTime,
+  sinceMapKey?: string,
+  tillMapKey?: string,
 }
 
 export interface Channel {
   uuid: string;
   logo: string;
+
   [key: string]: any;
 }
 

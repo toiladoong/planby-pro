@@ -17,6 +17,7 @@ interface LineProps {
   dayWidth: number;
   hourWidth: number;
   sidebarWidth: number;
+  top?: number;
 }
 
 const { Box } = LineStyled;
@@ -28,6 +29,7 @@ export function Line({
   dayWidth,
   hourWidth,
   sidebarWidth,
+  top,
 }: LineProps) {
   const { positionX } = useLine({
     startDate,
@@ -40,5 +42,5 @@ export function Line({
   const date = new Date(startDate);
   if (!isToday(date)) return null;
 
-  return <Box height={height} left={positionX} />;
+  return <Box height={height} left={positionX} top={top} />;
 }
