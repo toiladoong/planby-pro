@@ -92,3 +92,13 @@ export const Content = styled.div<{
   position: relative;
   left: ${({ isSidebar, sidebarWidth }) => (isSidebar ? sidebarWidth : 0)}px;
 `;
+
+export const Row = styled.div<{
+  width: number;
+  height: number;
+  theme?: Theme;
+}>`
+  background: ${({ theme }) => theme.primary[900]};
+  height: ${({ height }) => height}px;
+  width: ${({ width }) => width}px;
+`;

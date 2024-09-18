@@ -134,7 +134,7 @@ export function useEpg({
 
   const startDateTime = formatTime(startDate);
   const endDateTime = formatTime(endDate);
-  const programs = React.useMemo(
+  const { programs, programObj } = React.useMemo(
     () =>
       getConvertedPrograms({
         data: epg,
@@ -193,6 +193,7 @@ export function useEpg({
   const getLayoutProps = () => ({
     programs,
     channels,
+    programObj,
     startDate,
     endDate,
     scrollY,
@@ -208,6 +209,7 @@ export function useEpg({
     dayWidth,
     hourWidth,
     sidebarWidth,
+    itemWidth,
     itemHeight,
     channelMapKey,
     logoChannelMapKey,

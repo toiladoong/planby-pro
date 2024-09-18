@@ -33,6 +33,7 @@ interface RenderTimeline {
 interface LayoutProps {
   programs: ProgramItem[];
   channels: ChannelWithPosition[];
+  programObj?: { [key: string]: ProgramItem[] };
   startDate: DateTime;
   endDate: DateTime;
   scrollY: number;
@@ -42,6 +43,7 @@ interface LayoutProps {
   offsetStartHoursRange: number;
   sidebarWidth: number;
   itemHeight: number;
+  itemWidth?: number;
   channelMapKey?: string;
   logoChannelMapKey?: string;
   onScroll: (
@@ -64,12 +66,20 @@ interface LayoutProps {
   renderTimeline?: (v: RenderTimeline) => React.ReactNode;
 }
 
-const { ScrollBox, Content } = EpgStyled;
+const { ScrollBox, Content, Row } = EpgStyled;
 
 export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
   (props, scrollBoxRef) => {
-    const { channels, programs, startDate, endDate, scrollY } = props;
-    const { dayWidth, hourWidth, sidebarWidth, itemHeight, channelMapKey = 'uuid', logoChannelMapKey } = props;
+    const { channels, programs, programObj = {}, startDate, endDate, scrollY } = props;
+    const {
+      dayWidth,
+      hourWidth,
+      sidebarWidth,
+      itemWidth = 0,
+      itemHeight,
+      channelMapKey = 'uuid',
+      logoChannelMapKey
+    } = props;
     const { numberOfHoursInDay, offsetStartHoursRange } = props;
     const {
       isSidebar = true,
@@ -77,7 +87,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
       isLine = true,
       isBaseTimeFormat = false,
       isRTL = false,
-      // isRow = false,
+      isRow = false,
     } = props;
 
     const {
@@ -140,6 +150,49 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
       return <Timeline {...timeProps} {...props} />;
     };
 
+    let renderContent;
+
+    if (isRow) {
+      renderContent = (
+        <Content
+          data-testid="content"
+          sidebarWidth={sidebarWidth}
+          isSidebar={isSidebar}
+          width={dayWidth}
+          height={contentHeight}
+        >
+          {
+            Object.keys(programObj).map((channelId) => {
+              const programs = programObj[channelId];
+              const rowWidth = programs.length * itemWidth;
+
+              return (
+                <Row
+                  data-testid="row"
+                  width={rowWidth}
+                  height={itemHeight}
+                >
+                  {programs.map((program) => renderPrograms(program as ProgramWithPosition))}
+                </Row>
+              )
+            })
+          }
+        </Content>
+      )
+    } else {
+      renderContent = (
+        <Content
+          data-testid="content"
+          sidebarWidth={sidebarWidth}
+          isSidebar={isSidebar}
+          width={dayWidth}
+          height={contentHeight}
+        >
+          {programs.map((program) => renderPrograms(program as ProgramWithPosition))}
+        </Content>
+      )
+    }
+
     return (
       <ScrollBox isRTL={isRTL} ref={scrollBoxRef} onScroll={onScroll}>
         {isLine && isFuture && (
@@ -167,17 +220,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
             logoChannelMapKey={logoChannelMapKey}
           />
         )}
-        <Content
-          data-testid="content"
-          sidebarWidth={sidebarWidth}
-          isSidebar={isSidebar}
-          width={dayWidth}
-          height={contentHeight}
-        >
-          {programs.map((program) =>
-            renderPrograms(program as ProgramWithPosition)
-          )}
-        </Content>
+        {renderContent}
       </ScrollBox>
     );
   }

@@ -4,7 +4,7 @@ import { differenceInMinutes, getTime, endOfDay } from "date-fns";
 import { Channel, Program, ProgramPosition } from "./interfaces";
 
 // Import types
-import { ProgramWithPosition, Position, DateTime } from "./types";
+import { ProgramWithPosition, Position, DateTime, ProgramItem } from "./types";
 
 // Import variables
 import { HOUR_IN_MINUTES } from "./variables";
@@ -193,25 +193,26 @@ export const getConvertedPrograms = ({
   programChannelMapKey = 'channelUuid',
   sinceMapKey,
   tillMapKey,
-  // isRow
+  isRow
 }: ConvertedPrograms) => {
   let itemIndex = 0;
 
-  return data.map((program, index) => {
-    const channelIndex = channels.findIndex(
-      (channel) => channel[channelMapKey] === program[programChannelMapKey]
-    );
+  const programObj: { [key: string]: ProgramItem[] } = {};
+
+  const programs = data.map((program, index) => {
+    const channelId = program[programChannelMapKey];
+    const channelIndex = channels.findIndex((channel) => channel[channelMapKey] === channelId);
 
     const prevProgram = data[index - 1];
     const nextProgram = data[index + 1];
-    const isPrevSameChannel = prevProgram && (prevProgram[programChannelMapKey] === program[programChannelMapKey]);
-    const isNextSameChannel = nextProgram && (nextProgram[programChannelMapKey] === program[programChannelMapKey]);
+    const isPrevSameChannel = prevProgram && (prevProgram[programChannelMapKey] === channelId);
+    const isNextSameChannel = nextProgram && (nextProgram[programChannelMapKey] === channelId);
 
     itemIndex = isPrevSameChannel ? itemIndex + 1 : 0;
 
     // console.log('itemIndex', isPrevSameChannel, prevProgram, itemIndex)
 
-    return getProgramPosition({
+    const programPosition = getProgramPosition({
       program,
       nextProgram: isNextSameChannel ? nextProgram : undefined,
       channelIndex,
@@ -224,7 +225,22 @@ export const getConvertedPrograms = ({
       sinceMapKey,
       tillMapKey,
     });
+
+    if (isRow) {
+      if (!programObj[channelId]) {
+        programObj[channelId] = []
+      }
+
+      programObj[channelId].push(programPosition)
+    }
+
+    return programPosition;
   }, [] as ProgramWithPosition[])
+
+  return {
+    programs,
+    programObj
+  }
 };
 
 // -------- Converted channels with position data --------
