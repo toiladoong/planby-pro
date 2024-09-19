@@ -7,6 +7,7 @@ export type Position = {
   top: number;
   left: number;
   edgeEnd: number;
+  index?: number;
 };
 
 export type ProgramWithPosition = {

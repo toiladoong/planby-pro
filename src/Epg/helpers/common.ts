@@ -18,13 +18,13 @@ export const omit = (obj: OmitObjectType, ...props: string[]) => {
 export const generateArray = (num: number) => new Array(num).fill("");
 
 type ProgramOptions = {
-  position: { width: number; height: number; top: number; left: number };
+  position: { width: number; height: number; top: number; left: number, index?: number };
 };
 export const getProgramOptions = <T extends ProgramOptions>(program: T) => {
-  const { width, height, top, left } = program.position;
+  const { width, height, top, left, index } = program.position;
   return {
     ...program,
-    position: { width, height, top, left },
+    position: { width, height, top, left, index },
   };
 };
 

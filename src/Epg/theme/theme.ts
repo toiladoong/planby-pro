@@ -15,12 +15,12 @@ export const theme = {
     bg: "#171923db",
   },
   scrollbar: {
+    size: 10,
     border: "#ffffff",
     thumb: {
       bg: "#e1e1e1",
     },
   },
-
   gradient: {
     blue: {
       300: "#002eb3",
@@ -35,7 +35,6 @@ export const theme = {
       500: "#718096",
     },
   },
-
   timeline: {
     divider: {
       bg: "#718096",

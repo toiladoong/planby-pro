@@ -13,17 +13,20 @@ export interface Program {
 }
 
 export interface ProgramPosition {
-  program: Program,
-  nextProgram?: Program,
-  channelIndex: number,
-  itemIndex: number,
-  itemWidth?: number,
-  itemHeight: number,
-  hourWidth: number,
-  startDate: DateTime,
-  endDate: DateTime,
-  sinceMapKey?: string,
-  tillMapKey?: string,
+  program: Program;
+  nextProgram?: Program;
+  channelIndex: number;
+  itemIndex: number;
+  itemWidth?: number;
+  itemHeight: number;
+  hourWidth: number;
+  startDate: DateTime;
+  endDate: DateTime;
+  sinceMapKey?: string;
+  tillMapKey?: string;
+  isRow?: boolean;
+  isScrollBar?: boolean;
+  theme?: Theme;
 }
 
 export interface Channel {
@@ -31,6 +34,14 @@ export interface Channel {
   logo: string;
 
   [key: string]: any;
+}
+
+export interface ChannelPosition {
+  channelIndex: number;
+  itemHeight: number;
+  isRow?: boolean;
+  isScrollBar?: boolean;
+  theme?: Theme
 }
 
 export interface Theme {
@@ -48,6 +59,7 @@ export interface Theme {
     bg: string;
   };
   scrollbar: {
+    size: number;
     border: string;
     thumb: {
       bg: string;

@@ -17,7 +17,7 @@ import { getProgramOptions, isFutureTime } from "../helpers";
 import { EpgStyled } from "../styles";
 
 // Import components
-import { Timeline, Channels, Program, Line } from "../components";
+import { Timeline, Channels, Program, Line, Row } from "../components";
 
 interface RenderTimeline {
   isBaseTimeFormat: BaseTimeFormat;
@@ -42,6 +42,8 @@ interface LayoutProps {
   numberOfHoursInDay: number;
   offsetStartHoursRange: number;
   sidebarWidth: number;
+  layoutWidth: number;
+  layoutHeight: number;
   itemHeight: number;
   itemWidth?: number;
   channelMapKey?: string;
@@ -55,7 +57,9 @@ interface LayoutProps {
   isTimeline?: boolean;
   isLine?: boolean;
   isRow?: boolean;
-  isProgramVisible: (position: Position) => boolean;
+  isScrollBar?: boolean;
+  isScrollToNow?: boolean;
+  isProgramVisible: (position: Position, params: any) => boolean;
   isChannelVisible: (position: Pick<Position, "top">) => boolean;
   renderProgram?: (v: {
     program: ProgramItem;
@@ -64,14 +68,18 @@ interface LayoutProps {
   }) => React.ReactNode;
   renderChannel?: (v: { channel: ChannelWithPosition }) => React.ReactNode;
   renderTimeline?: (v: RenderTimeline) => React.ReactNode;
+  containerRef?: any;
+  getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
 }
 
-const { ScrollBox, Content, Row } = EpgStyled;
+const { ScrollBox, RowContent, Content } = EpgStyled;
 
 export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
   (props, scrollBoxRef) => {
     const { channels, programs, programObj = {}, startDate, endDate, scrollY } = props;
     const {
+      layoutWidth,
+      layoutHeight,
       dayWidth,
       hourWidth,
       sidebarWidth,
@@ -82,12 +90,16 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
     } = props;
     const { numberOfHoursInDay, offsetStartHoursRange } = props;
     const {
+      containerRef,
       isSidebar = true,
       isTimeline = true,
       isLine = true,
       isBaseTimeFormat = false,
       isRTL = false,
       isRow = false,
+      isScrollBar = false,
+      isScrollToNow = false,
+      getLiveProgram,
     } = props;
 
     const {
@@ -106,9 +118,9 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
     ]);
     const isFuture = isFutureTime(endDate);
 
-    const renderPrograms = (program: ProgramWithPosition) => {
+    const renderPrograms = (program: ProgramWithPosition, params: any = {}) => {
       const { position } = program;
-      const isVisible = isProgramVisible(position);
+      const isVisible = isProgramVisible(position, params);
 
       if (isVisible) {
         const options = getProgramOptions(program);
@@ -154,11 +166,10 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
 
     if (isRow) {
       renderContent = (
-        <Content
+        <RowContent
           data-testid="content"
           sidebarWidth={sidebarWidth}
           isSidebar={isSidebar}
-          width={dayWidth}
           height={contentHeight}
         >
           {
@@ -168,16 +179,26 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
 
               return (
                 <Row
-                  data-testid="row"
+                  isRTL={isRTL}
+                  isScrollBar={isScrollBar}
                   width={rowWidth}
                   height={itemHeight}
-                >
-                  {programs.map((program) => renderPrograms(program as ProgramWithPosition))}
-                </Row>
+                  programs={programs}
+                  renderPrograms={renderPrograms}
+                  startDate={startDate}
+                  endDate={endDate}
+                  containerRef={containerRef}
+                  layoutWidth={layoutWidth}
+                  layoutHeight={layoutHeight}
+                  sidebarWidth={sidebarWidth}
+                  itemWidth={itemWidth}
+                  isScrollToNow={isScrollToNow}
+                  getLiveProgram={getLiveProgram}
+                />
               )
             })
           }
-        </Content>
+        </RowContent>
       )
     } else {
       renderContent = (

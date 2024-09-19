@@ -1,7 +1,7 @@
 import { differenceInMinutes, getTime, endOfDay } from "date-fns";
 
 // Import interfaces
-import { Channel, Program, ProgramPosition } from "./interfaces";
+import { Channel, Program, ProgramPosition, ChannelPosition, Theme } from "./interfaces";
 
 // Import types
 import { ProgramWithPosition, Position, DateTime, ProgramItem } from "./types";
@@ -22,13 +22,23 @@ const getItemDiffWidth = (diff: number, hourWidth: number) =>
   (diff * hourWidth) / HOUR_IN_MINUTES;
 
 export const getPositionX = (
-  since: DateTime,
-  till: DateTime,
-  startDate: DateTime,
-  endDate: DateTime,
-  hourWidth: number,
-  itemIndex?: number,
-  itemWidth?: number,
+  {
+    since,
+    till,
+    startDate,
+    endDate,
+    hourWidth,
+    itemIndex,
+    itemWidth,
+  }: {
+    since: DateTime,
+    till: DateTime,
+    startDate: DateTime,
+    endDate: DateTime,
+    hourWidth: number,
+    itemIndex?: number,
+    itemWidth?: number,
+  }
 ) => {
   if (itemWidth && (itemIndex || itemIndex === 0)) {
     return itemWidth * itemIndex;
@@ -73,11 +83,16 @@ export const getPositionX = (
 };
 
 // -------- Channel position in the Epg --------
-export const getChannelPosition = (
-  channelIndex: number,
-  itemHeight: number
-) => {
-  const top = itemHeight * channelIndex;
+export const getChannelPosition = ({
+  channelIndex,
+  itemHeight,
+  isRow,
+  isScrollBar,
+  theme
+}: ChannelPosition) => {
+  const offsetTop = isRow && isScrollBar ? (theme?.scrollbar?.size || 0) : 0;
+
+  const top = (itemHeight + offsetTop) * channelIndex;
   const position = {
     top,
     height: itemHeight,
@@ -97,6 +112,9 @@ export const getProgramPosition = ({
   endDate,
   sinceMapKey = 'since',
   tillMapKey = 'till',
+  theme,
+  isRow,
+  isScrollBar
 }: ProgramPosition) => {
   let since = program[sinceMapKey];
   let till = program[tillMapKey];
@@ -109,6 +127,14 @@ export const getProgramPosition = ({
     ...program
   };
 
+  const offsetTop = isRow && isScrollBar ? (theme?.scrollbar?.size || 0) : 0;
+
+  let top = (itemHeight + offsetTop) * channelIndex;
+
+  if (isRow) {
+    top = 0
+  }
+
   if (program.isEmpty) {
     if (!itemWidth) {
       itemWidth = 200
@@ -117,7 +143,7 @@ export const getProgramPosition = ({
     const position = {
       width: itemWidth,
       height: itemHeight,
-      top: itemHeight * channelIndex,
+      top,
       left: 0,
       edgeEnd: itemWidth,
     };
@@ -130,25 +156,33 @@ export const getProgramPosition = ({
 
   const isYesterday = isYesterdayTime(item.since, startDate);
 
-  let width = itemWidth || getPositionX(
-    item.since,
-    item.till,
+  let width = itemWidth || getPositionX({
+    since: item.since,
+    till: item.till,
     startDate,
     endDate,
     hourWidth
-  );
+  });
 
-  const top = itemHeight * channelIndex;
-  let left = getPositionX(startDate, item.since, startDate, endDate, hourWidth, itemIndex, itemWidth);
-  const edgeEnd = getPositionX(
-    startDate,
-    item.till,
+  let left = getPositionX({
+    since: startDate,
+    till: item.since,
     startDate,
     endDate,
     hourWidth,
-    itemIndex + 1,
+    itemIndex,
     itemWidth
-  );
+  });
+
+  const edgeEnd = getPositionX({
+    since: startDate,
+    till: item.till,
+    startDate,
+    endDate,
+    hourWidth,
+    itemIndex: itemIndex + 1,
+    itemWidth
+  });
 
   if (isYesterday) left = 0;
   // If item has negative top position, it means that it is not visible in this day
@@ -160,6 +194,7 @@ export const getProgramPosition = ({
     top,
     left,
     edgeEnd,
+    index: itemIndex
   };
 
   return { position, data: item };
@@ -179,6 +214,8 @@ interface ConvertedPrograms {
   sinceMapKey?: string;
   tillMapKey?: string;
   isRow?: boolean;
+  isScrollBar?: boolean;
+  theme: Theme
 }
 
 export const getConvertedPrograms = ({
@@ -193,7 +230,9 @@ export const getConvertedPrograms = ({
   programChannelMapKey = 'channelUuid',
   sinceMapKey,
   tillMapKey,
-  isRow
+  isRow,
+  isScrollBar,
+  theme
 }: ConvertedPrograms) => {
   let itemIndex = 0;
 
@@ -224,6 +263,9 @@ export const getConvertedPrograms = ({
       endDate,
       sinceMapKey,
       tillMapKey,
+      isRow,
+      isScrollBar,
+      theme
     });
 
     if (isRow) {
@@ -244,10 +286,30 @@ export const getConvertedPrograms = ({
 };
 
 // -------- Converted channels with position data --------
-export const getConvertedChannels = (channels: Channel[], itemHeight: number) =>
+interface ConvertedChannels {
+  channels: Channel[];
+  itemHeight: number;
+  isRow?: boolean;
+  isScrollBar?: boolean;
+  theme?: Theme
+}
+
+export const getConvertedChannels = ({
+  channels,
+  itemHeight,
+  isRow,
+  isScrollBar,
+  theme
+}: ConvertedChannels) =>
   channels.map((channel, index) => ({
     ...channel,
-    position: getChannelPosition(index, itemHeight),
+    position: getChannelPosition({
+      channelIndex: index,
+      itemHeight,
+      isRow,
+      isScrollBar,
+      theme
+    }),
   }));
 
 // -------- Dynamic virtual program visibility in the EPG --------
@@ -257,8 +319,29 @@ export const getItemVisibility = (
   scrollX: number,
   containerHeight: number,
   containerWidth: number,
-  itemOverscan: number
+  itemOverscan: number,
+  params: any = {}
 ) => {
+  const { layoutProps = {} } = params;
+
+  if (layoutProps.scrollX || layoutProps.scrollX === 0) {
+    scrollX = layoutProps.scrollX
+  }
+
+  if (layoutProps.scrollY || layoutProps.scrollY === 0) {
+    scrollY = layoutProps.scrollY
+  }
+
+  if (layoutProps.layoutWidth) {
+    containerWidth = layoutProps.layoutWidth
+  }
+
+  if (layoutProps.layoutHeight) {
+    containerHeight = layoutProps.layoutHeight
+  }
+
+  // console.log('layoutProps getItemVisibility', layoutProps, scrollX, scrollY)
+
   if (position.width <= 0) {
     return false;
   }

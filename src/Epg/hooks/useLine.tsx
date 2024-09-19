@@ -26,13 +26,13 @@ export function useLine({
   sidebarWidth,
 }: useLineProps) {
   const initialState =
-    getPositionX(
-      startOfDay(new Date(startDate)),
-      new Date(),
+    getPositionX({
+      since: startOfDay(new Date(startDate)),
+      till: new Date(),
       startDate,
       endDate,
       hourWidth
-    ) + sidebarWidth;
+    }) + sidebarWidth;
   const [positionX, setPositionX] = React.useState<number>(() => initialState);
 
   const isDayEnd = positionX <= dayWidth;
@@ -48,13 +48,13 @@ export function useLine({
 
   React.useEffect(() => {
     const date = new Date(startDate);
-    const positionX = getPositionX(
-      startOfDay(date),
-      new Date(),
+    const positionX = getPositionX({
+      since: startOfDay(date),
+      till: new Date(),
       startDate,
       endDate,
       hourWidth
-    );
+    });
     const newPositionX = positionX + sidebarWidth;
     setPositionX(newPositionX);
   }, [startDate, endDate, sidebarWidth, hourWidth]);

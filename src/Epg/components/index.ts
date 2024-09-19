@@ -5,3 +5,4 @@ export * from "./Channel";
 export * from "./Timeline";
 export * from "./Line";
 export * from "./Loader";
+export * from "./Row";

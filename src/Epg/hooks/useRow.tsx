@@ -3,7 +3,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { startOfToday, isToday as isTodayFns } from "date-fns";
 
 // Import types
-import { DateTime } from "../helpers/types";
+import { DateTime, ProgramItem } from "../helpers/types";
 
 // Import helpers
 import {
@@ -13,34 +13,37 @@ import {
   useIsomorphicLayoutEffect,
 } from "../helpers";
 
-interface useLayoutProps {
+interface useRowProps {
   height?: number;
   width?: number;
   hourWidth: number;
   sidebarWidth: number;
+  itemWidth?: number;
   startDate: DateTime;
   endDate: DateTime;
+  containerRef: any;
+  isScrollToNow?: boolean;
+  liveProgram?: ProgramItem;
 }
 
-export function useLayout({
+export function useRow({
   height,
   width,
   startDate,
   endDate,
   hourWidth,
   sidebarWidth,
-}: useLayoutProps) {
+  itemWidth,
+  containerRef,
+  isScrollToNow,
+  liveProgram
+}: useRowProps) {
   const useIsomorphicEffect = useIsomorphicLayoutEffect();
 
-  const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollBoxRef = React.useRef<HTMLDivElement>(null);
   //-------- State --------
   const [scrollY, setScrollY] = React.useState<number>(0);
   const [scrollX, setScrollX] = React.useState<number>(0);
-  const [layoutWidth, setLayoutWidth] = React.useState<number>(width as number);
-  const [layoutHeight, setLayoutHeight] = React.useState<number>(
-    height as number
-  );
   const isToday = isTodayFns(new Date(startDate));
 
   // -------- Handlers --------
@@ -62,22 +65,30 @@ export function useLayout({
 
   const handleOnScrollToNow = React.useCallback(() => {
     if (scrollBoxRef?.current && isToday) {
-      const clientWidth = (width ??
-        containerRef.current?.clientWidth) as number;
+      // const clientWidth = (width ?? containerRef.current?.clientWidth) as number;
 
       const newDate = new Date();
-      const scrollPosition = getPositionX({
-        since: startOfToday(),
-        till: newDate,
-        startDate,
-        endDate,
-        hourWidth
-      });
-      const scrollNow = scrollPosition - clientWidth / 2 + sidebarWidth;
-      console.log('scrollBoxRef.current useLayout', scrollBoxRef.current, scrollNow)
+      let scrollPosition = 0;
+
+      if (liveProgram) {
+        scrollPosition = liveProgram.position.left
+      } else {
+        scrollPosition = getPositionX({
+          since: startOfToday(),
+          till: newDate,
+          startDate,
+          endDate,
+          hourWidth,
+          itemIndex: 0,
+          itemWidth
+        })
+      }
+
+      const scrollNow = scrollPosition + sidebarWidth;
+      // console.log('scrollBoxRef.current', scrollNow, scrollBoxRef.current)
       scrollBoxRef.current.scrollLeft = scrollNow;
     }
-  }, [isToday, startDate, endDate, width, sidebarWidth, hourWidth]);
+  }, [isToday, startDate, endDate, width, sidebarWidth, hourWidth, liveProgram]);
 
   const handleOnScrollTop = React.useCallback(
     (value: number = hourWidth) => {
@@ -109,52 +120,18 @@ export function useLayout({
     [hourWidth]
   );
 
-  const handleResizeDebounced = useDebouncedCallback(
-    () => {
-      if (containerRef?.current && !width) {
-        const container = containerRef.current;
-        const { clientWidth } = container;
-        setLayoutWidth(clientWidth);
-      }
-    },
-    DEBOUNCE_WAIT * 4,
-    { maxWait: DEBOUNCE_WAIT_MAX * 4 }
-  );
-
   // -------- Effects --------
   useIsomorphicEffect(() => {
-    if (containerRef?.current) {
-      const container = containerRef.current;
-      if (!width) {
-        const { clientWidth } = container;
-        setLayoutWidth(clientWidth);
-      }
-      if (!height) {
-        const { clientHeight } = container;
-        setLayoutHeight(clientHeight);
-      }
-    }
-
-    if (scrollBoxRef?.current && isToday) {
+    if (scrollBoxRef?.current && isToday && isScrollToNow) {
       handleOnScrollToNow();
     }
-  }, [height, width, startDate, isToday, handleOnScrollToNow]);
-
-  useIsomorphicEffect(() => {
-    window.addEventListener("resize", handleResizeDebounced);
-
-    return () => {
-      window.removeEventListener("resize", handleResizeDebounced);
-    };
-  }, [width]);
+  }, [height, width, startDate, isToday, isScrollToNow, handleOnScrollToNow, liveProgram]);
 
   return {
     containerRef,
     scrollBoxRef,
     scrollX,
     scrollY,
-    layoutWidth,
-    layoutHeight,
     onScroll: handleOnScroll,
     onScrollToNow: handleOnScrollToNow,
     onScrollTop: handleOnScrollTop,

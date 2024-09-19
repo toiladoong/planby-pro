@@ -5,7 +5,7 @@ import { startOfToday } from "date-fns";
 import { Channel, Program, Theme } from "../helpers/interfaces";
 
 // Import types
-import { DateTime, BaseTimeFormat, Position } from "../helpers/types";
+import { DateTime, BaseTimeFormat, Position, ProgramItem } from "../helpers/types";
 
 // Import helpers
 import {
@@ -45,6 +45,8 @@ interface useEpgProps {
   isRTL?: boolean;
   isLine?: boolean;
   isRow?: boolean;
+  isScrollBar?: boolean;
+  isScrollToNow?: boolean;
   theme?: Theme;
   globalStyles?: string;
   dayWidth?: number;
@@ -58,6 +60,7 @@ interface useEpgProps {
   sinceMapKey?: string;
   tillMapKey?: string;
   maxLength?: number;
+  getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
 }
 
 const defaultStartDateTime = formatTime(startOfToday());
@@ -73,6 +76,8 @@ export function useEpg({
   isTimeline = true,
   isLine = true,
   isRow = false,
+  isScrollBar = true,
+  isScrollToNow = true,
   theme: customTheme,
   globalStyles,
   dayWidth: customDayWidth = DAY_WIDTH,
@@ -87,12 +92,15 @@ export function useEpg({
   logoChannelMapKey,
   programChannelMapKey,
   sinceMapKey,
-  tillMapKey
+  tillMapKey,
+  getLiveProgram
 }: useEpgProps) {
   if (itemWidth) {
     isTimeline = false;
     isLine = false;
   }
+
+  const theme: Theme = customTheme || defaultTheme;
 
   // Get converted start and end dates
   const { startDate, endDate } = getTimeRangeDates(
@@ -128,7 +136,13 @@ export function useEpg({
 
   //-------- Variables --------
   const channels = React.useMemo(
-    () => getConvertedChannels(channelsEpg, itemHeight),
+    () => getConvertedChannels({
+      channels: channelsEpg,
+      itemHeight,
+      isRow,
+      isScrollBar,
+      theme
+    }),
     [channelsEpg, itemHeight]
   );
 
@@ -148,28 +162,31 @@ export function useEpg({
         programChannelMapKey,
         sinceMapKey,
         tillMapKey,
-        isRow
+        isRow,
+        isScrollBar,
+        theme
       }),
     [epg, channels, startDateTime, endDateTime, itemWidth, itemHeight, hourWidth]
   );
 
   // console.log('programs', programs)
 
-  const theme: Theme = customTheme || defaultTheme;
-
   // -------- Handlers --------
   const isProgramVisible = React.useCallback(
-    (position: Position) =>
+    (position: Position, params: any) =>
       getItemVisibility(
         position,
         scrollY,
         scrollX,
         layoutHeight,
         layoutWidth,
-        itemOverscan
+        itemOverscan,
+        params
       ),
     [scrollY, scrollX, layoutHeight, layoutWidth, itemOverscan]
   );
+
+  // console.log('layoutWidth', layoutWidth)
 
   const isChannelVisible = React.useCallback(
     (position: Pick<Position, "top">) =>
@@ -206,14 +223,20 @@ export function useEpg({
     isProgramVisible,
     isChannelVisible,
     isRow,
+    isScrollBar,
+    isScrollToNow,
     dayWidth,
     hourWidth,
     sidebarWidth,
+    layoutWidth,
+    layoutHeight,
     itemWidth,
     itemHeight,
     channelMapKey,
     logoChannelMapKey,
+    getLiveProgram,
     ...dayWidthResourcesProps,
+    containerRef,
     ref: scrollBoxRef,
   });
 
