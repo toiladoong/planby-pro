@@ -10,7 +10,7 @@ import { RowBox, ScrollBox, ArrowNext, ArrowPrev, Wrapper } from "./styles";
 
 interface RowProps {
   isRTL?: boolean;
-  width: number;
+  width?: number;
   height: number;
   programs: ProgramItem[]
   renderPrograms: (program: ProgramWithPosition, params: any) => React.ReactNode;
@@ -24,6 +24,8 @@ interface RowProps {
   isScrollToNow?: boolean;
   itemWidth?: number;
   getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
+  onReachBeginning?: () => void;
+  onReachEnd?: () => void;
 }
 
 export function Row({
@@ -40,10 +42,18 @@ export function Row({
   layoutWidth,
   layoutHeight,
   sidebarWidth,
-  itemWidth,
-  getLiveProgram
+  itemWidth = 0,
+  getLiveProgram,
+  onReachBeginning,
+  onReachEnd
 }: RowProps) {
   const liveProgram = getLiveProgram?.(programs);
+  const firstProgram = programs[0];
+  const lastProgram = programs[programs.length - 1];
+
+  if (!width) {
+    width = programs.length * itemWidth;
+  }
 
   const { scrollBoxRef, ...layoutProps } = useRow({
     containerRef,
@@ -55,7 +65,12 @@ export function Row({
     hourWidth: 0,
     itemWidth,
     isScrollToNow,
-    liveProgram
+    liveProgram,
+    firstProgram,
+    lastProgram,
+    onReachBeginning,
+    onReachEnd,
+    layoutWidth
   });
 
   const { scrollX, scrollY, onScroll, onScrollLeft, onScrollRight } = layoutProps;
@@ -65,17 +80,22 @@ export function Row({
   return (
     <Wrapper>
       <ArrowPrev
+        className="arrow arrow-prev"
         onClick={() => {
           console.log('ArrowPrev')
-          onScrollLeft(10)
+          onScrollLeft()
         }}
       >
-        Prev
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             className="lucide lucide-chevron-left">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
       </ArrowPrev>
       <ScrollBox
         isRTL={isRTL}
         isScrollBar={isScrollBar}
-        ref={containerRef}
+        ref={scrollBoxRef}
         height={height}
         onScroll={onScroll}
       >
@@ -83,7 +103,6 @@ export function Row({
           data-testid="row"
           width={width}
           height={height}
-          ref={scrollBoxRef}
         >
           {
             programs.map((program) => renderPrograms(program as ProgramWithPosition, {
@@ -98,12 +117,17 @@ export function Row({
         </RowBox>
       </ScrollBox>
       <ArrowNext
+        className="arrow arrow-next"
         onClick={() => {
           console.log('ArrowNext')
-          onScrollRight(10)
+          onScrollRight()
         }}
       >
-        Next
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             className="lucide lucide-chevron-right">
+          <path d="m9 18 6-6-6-6"/>
+        </svg>
       </ArrowNext>
     </Wrapper>
   );

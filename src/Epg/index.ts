@@ -21,7 +21,8 @@ export type ProgramItem = {
 // Components
 export { Layout } from "./components";
 export { Epg } from "./Epg";
-export { useEpg, useProgram, useTimeline } from "./hooks";
+export { useEpg, useProgram, useTimeline, useStore } from "./hooks";
+export { getConvertedPrograms } from "./helpers/epg";
 
 // Styles
 const { ChannelBox, ChannelLogo } = ChannelStyled;

@@ -15,8 +15,9 @@ import {
 
 interface useRowProps {
   height?: number;
-  width?: number;
+  width: number;
   hourWidth: number;
+  layoutWidth: number;
   sidebarWidth: number;
   itemWidth?: number;
   startDate: DateTime;
@@ -24,19 +25,27 @@ interface useRowProps {
   containerRef: any;
   isScrollToNow?: boolean;
   liveProgram?: ProgramItem;
+  firstProgram?: ProgramItem;
+  lastProgram?: ProgramItem;
+  onReachBeginning?: () => void;
+  onReachEnd?: (params: any) => void;
 }
 
 export function useRow({
+  layoutWidth,
   height,
   width,
   startDate,
   endDate,
   hourWidth,
   sidebarWidth,
-  itemWidth,
+  itemWidth = 0,
   containerRef,
   isScrollToNow,
-  liveProgram
+  liveProgram,
+  lastProgram,
+  onReachBeginning,
+  onReachEnd
 }: useRowProps) {
   const useIsomorphicEffect = useIsomorphicLayoutEffect();
 
@@ -71,7 +80,7 @@ export function useRow({
       let scrollPosition = 0;
 
       if (liveProgram) {
-        scrollPosition = liveProgram.position.left
+        scrollPosition = liveProgram.position.left - itemWidth
       } else {
         scrollPosition = getPositionX({
           since: startOfToday(),
@@ -84,9 +93,12 @@ export function useRow({
         })
       }
 
-      const scrollNow = scrollPosition + sidebarWidth;
-      // console.log('scrollBoxRef.current', scrollNow, scrollBoxRef.current)
-      scrollBoxRef.current.scrollLeft = scrollNow;
+      scrollBoxRef.current.scrollLeft = scrollPosition;
+
+      // scrollBoxRef.current.scrollTo({
+      //   left: scrollPosition,
+      //   behavior: 'auto'
+      // });
     }
   }, [isToday, startDate, endDate, width, sidebarWidth, hourWidth, liveProgram]);
 
@@ -100,25 +112,49 @@ export function useRow({
     [hourWidth]
   );
 
-  const handleOnScrollRight = React.useCallback(
-    (value: number = hourWidth) => {
-      if (scrollBoxRef?.current) {
-        const right = scrollBoxRef.current.scrollLeft + value;
-        scrollBoxRef.current.scrollLeft = right;
-      }
-    },
-    [hourWidth]
-  );
-
   const handleOnScrollLeft = React.useCallback(
-    (value: number = hourWidth) => {
+    (value?: number) => {
       if (scrollBoxRef?.current) {
-        const left = scrollBoxRef.current.scrollLeft - value;
+        let left = 0;
+
+        if (value) {
+          left = scrollBoxRef.current.scrollLeft - value;
+        } else {
+          left = scrollBoxRef.current.scrollLeft - itemWidth * 2;
+        }
+
+        if (left <= 0) {
+          onReachBeginning?.();
+        }
+
+        // console.log('handleOnScrollLeft', left)
         scrollBoxRef.current.scrollLeft = left;
       }
-    },
-    [hourWidth]
-  );
+    }, [width]);
+
+  const handleOnScrollRight = React.useCallback(
+    (value?: number) => {
+      if (scrollBoxRef?.current) {
+        let right = 0;
+
+        if (value) {
+          right = scrollBoxRef.current.scrollLeft + value;
+        } else {
+          right = scrollBoxRef.current.scrollLeft + itemWidth * 2;
+        }
+
+        console.log('handleOnScrollRight', right, layoutWidth - sidebarWidth)
+
+        if (right >= (layoutWidth - sidebarWidth)) {
+          onReachEnd?.({
+            lastProgram
+          });
+        }
+
+        // console.log('handleOnScrollRight', right)
+        scrollBoxRef.current.scrollLeft = right;
+      }
+    }, [layoutWidth, sidebarWidth, lastProgram, width]);
 
   // -------- Effects --------
   useIsomorphicEffect(() => {

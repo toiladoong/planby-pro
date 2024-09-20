@@ -5,6 +5,12 @@ export const Wrapper = styled.div<{
 
 }>`
     position: relative;
+
+    :hover {
+        .arrow {
+            opacity: 1;
+        }
+    }
 `;
 
 export const RowBox = styled.div<{
@@ -59,18 +65,34 @@ export const ArrowNext = styled.div<{
 
 }>`
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 50%;
+    right: 10px;
     z-index: 5;
     cursor: pointer;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    padding: 2px;
+    line-height: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+    user-select: none;
 `;
 
 export const ArrowPrev = styled.div<{
 
 }>`
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
     z-index: 5;
     cursor: pointer;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    padding: 2px;
+    line-height: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+    user-select: none;
 `;

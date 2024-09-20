@@ -239,11 +239,24 @@ export const getConvertedPrograms = ({
   const programObj: { [key: string]: ProgramItem[] } = {};
 
   const programs = data.map((program, index) => {
+    if (program?.position && program?.data) {
+      program = program?.data as Program;
+    }
+
     const channelId = program[programChannelMapKey];
     const channelIndex = channels.findIndex((channel) => channel[channelMapKey] === channelId);
 
-    const prevProgram = data[index - 1];
-    const nextProgram = data[index + 1];
+    let prevProgram = data[index - 1];
+    let nextProgram = data[index + 1];
+
+    if (prevProgram?.position && prevProgram?.data) {
+      prevProgram = prevProgram?.data as Program;
+    }
+
+    if (nextProgram?.position && nextProgram?.data) {
+      nextProgram = nextProgram?.data as Program;
+    }
+
     const isPrevSameChannel = prevProgram && (prevProgram[programChannelMapKey] === channelId);
     const isNextSameChannel = nextProgram && (nextProgram[programChannelMapKey] === channelId);
 

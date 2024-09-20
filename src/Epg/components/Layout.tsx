@@ -68,6 +68,11 @@ interface LayoutProps {
   }) => React.ReactNode;
   renderChannel?: (v: { channel: ChannelWithPosition }) => React.ReactNode;
   renderTimeline?: (v: RenderTimeline) => React.ReactNode;
+  renderRow?: (v: {
+    channelId: string;
+    programs: ProgramItem[];
+    row: any
+  }) => React.ReactNode;
   containerRef?: any;
   getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
 }
@@ -109,6 +114,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
       renderProgram,
       renderChannel,
       renderTimeline,
+      renderRow
     } = props;
 
     const channelsLength = channels.length;
@@ -175,13 +181,11 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
           {
             Object.keys(programObj).map((channelId) => {
               const programs = programObj[channelId];
-              const rowWidth = programs.length * itemWidth;
 
-              return (
+              const row = (
                 <Row
                   isRTL={isRTL}
                   isScrollBar={isScrollBar}
-                  width={rowWidth}
                   height={itemHeight}
                   programs={programs}
                   renderPrograms={renderPrograms}
@@ -196,6 +200,16 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
                   getLiveProgram={getLiveProgram}
                 />
               )
+
+              if (renderRow) {
+                return renderRow({
+                  channelId,
+                  programs,
+                  row
+                })
+              }
+
+              return row
             })
           }
         </RowContent>
