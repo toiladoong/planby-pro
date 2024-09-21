@@ -33,7 +33,12 @@ interface RenderTimeline {
 interface LayoutProps {
   programs: ProgramItem[];
   channels: ChannelWithPosition[];
-  programObj?: { [key: string]: ProgramItem[] };
+  programObj?: {
+    [key: string]: {
+      position: { top: number },
+      programs: ProgramItem[]
+    }
+  };
   startDate: DateTime;
   endDate: DateTime;
   scrollY: number;
@@ -180,13 +185,23 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
         >
           {
             Object.keys(programObj).map((channelId) => {
-              const programs = programObj[channelId];
+              const position: any = programObj[channelId]?.position;
+              const programs = programObj[channelId]?.programs;
+
+              const isVisible = isProgramVisible(position, {
+                isInRow: true
+              });
+
+              if (!isVisible) {
+                return null
+              }
 
               const row = (
                 <Row
                   isRTL={isRTL}
                   isScrollBar={isScrollBar}
                   height={itemHeight}
+                  position={position}
                   programs={programs}
                   renderPrograms={renderPrograms}
                   startDate={startDate}

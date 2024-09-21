@@ -27,7 +27,7 @@ interface useRowProps {
   liveProgram?: ProgramItem;
   firstProgram?: ProgramItem;
   lastProgram?: ProgramItem;
-  onReachBeginning?: () => void;
+  onReachBeginning?: (params: any) => void;
   onReachEnd?: (params: any) => void;
 }
 
@@ -43,6 +43,7 @@ export function useRow({
   containerRef,
   isScrollToNow,
   liveProgram,
+  firstProgram,
   lastProgram,
   onReachBeginning,
   onReachEnd
@@ -50,6 +51,7 @@ export function useRow({
   const useIsomorphicEffect = useIsomorphicLayoutEffect();
 
   const scrollBoxRef = React.useRef<HTMLDivElement>(null);
+  const scrollToNowRef = React.useRef(false);
   //-------- State --------
   const [scrollY, setScrollY] = React.useState<number>(0);
   const [scrollX, setScrollX] = React.useState<number>(0);
@@ -124,13 +126,15 @@ export function useRow({
         }
 
         if (left <= 0) {
-          onReachBeginning?.();
+          onReachBeginning?.({
+            firstProgram
+          });
         }
 
         // console.log('handleOnScrollLeft', left)
         scrollBoxRef.current.scrollLeft = left;
       }
-    }, [width]);
+    }, [width, firstProgram]);
 
   const handleOnScrollRight = React.useCallback(
     (value?: number) => {
@@ -143,9 +147,9 @@ export function useRow({
           right = scrollBoxRef.current.scrollLeft + itemWidth * 2;
         }
 
-        console.log('handleOnScrollRight', right, layoutWidth - sidebarWidth)
+        // console.log('handleOnScrollRight', right, width - layoutWidth)
 
-        if (right >= (layoutWidth - sidebarWidth)) {
+        if (right >= (width - layoutWidth)) {
           onReachEnd?.({
             lastProgram
           });
@@ -154,12 +158,13 @@ export function useRow({
         // console.log('handleOnScrollRight', right)
         scrollBoxRef.current.scrollLeft = right;
       }
-    }, [layoutWidth, sidebarWidth, lastProgram, width]);
+    }, [width, layoutWidth, sidebarWidth, lastProgram]);
 
   // -------- Effects --------
   useIsomorphicEffect(() => {
-    if (scrollBoxRef?.current && isToday && isScrollToNow) {
+    if (scrollBoxRef?.current && isToday && isScrollToNow && !scrollToNowRef.current) {
       handleOnScrollToNow();
+      scrollToNowRef.current = true;
     }
   }, [height, width, startDate, isToday, isScrollToNow, handleOnScrollToNow, liveProgram]);
 

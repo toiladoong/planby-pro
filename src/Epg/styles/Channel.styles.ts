@@ -2,12 +2,10 @@ import styled from "@emotion/styled/macro";
 import { Theme } from "../helpers";
 
 export const ChannelBox = styled.div<{
-  top: number;
   height: number;
   theme?: Theme;
 }>`
   position: absolute;
-  top: ${({ top }) => top}px;
   height: ${({ height }) => height + 10}px;
   width: 100%;
   display: flex;

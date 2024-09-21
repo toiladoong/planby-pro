@@ -12,6 +12,7 @@ interface RowProps {
   isRTL?: boolean;
   width?: number;
   height: number;
+  position: { top: number };
   programs: ProgramItem[]
   renderPrograms: (program: ProgramWithPosition, params: any) => React.ReactNode;
   startDate: DateTime;
@@ -34,6 +35,7 @@ export function Row({
   isScrollToNow,
   width,
   height,
+  position,
   programs,
   renderPrograms,
   startDate,
@@ -73,12 +75,16 @@ export function Row({
     layoutWidth
   });
 
-  const { scrollX, scrollY, onScroll, onScrollLeft, onScrollRight } = layoutProps;
+  const { scrollX, onScroll, onScrollLeft, onScrollRight } = layoutProps;
 
   // console.log('layoutProps Row', layoutProps)
 
   return (
-    <Wrapper>
+    <Wrapper
+      style={{
+        ...position
+      }}
+    >
       <ArrowPrev
         className="arrow arrow-prev"
         onClick={() => {
@@ -101,14 +107,15 @@ export function Row({
       >
         <RowBox
           data-testid="row"
-          width={width}
           height={height}
+          style={{
+            width
+          }}
         >
           {
             programs.map((program) => renderPrograms(program as ProgramWithPosition, {
               layoutProps: {
                 scrollX,
-                scrollY,
                 layoutWidth,
                 layoutHeight
               }

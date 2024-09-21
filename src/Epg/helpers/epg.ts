@@ -112,9 +112,7 @@ export const getProgramPosition = ({
   endDate,
   sinceMapKey = 'since',
   tillMapKey = 'till',
-  theme,
-  isRow,
-  isScrollBar
+  offsetTop = 0
 }: ProgramPosition) => {
   let since = program[sinceMapKey];
   let till = program[tillMapKey];
@@ -127,13 +125,11 @@ export const getProgramPosition = ({
     ...program
   };
 
-  const offsetTop = isRow && isScrollBar ? (theme?.scrollbar?.size || 0) : 0;
-
   let top = (itemHeight + offsetTop) * channelIndex;
 
-  if (isRow) {
-    top = 0
-  }
+  // if (isRow) {
+  //   top = 0
+  // }
 
   if (program.isEmpty) {
     if (!itemWidth) {
@@ -236,7 +232,12 @@ export const getConvertedPrograms = ({
 }: ConvertedPrograms) => {
   let itemIndex = 0;
 
-  const programObj: { [key: string]: ProgramItem[] } = {};
+  const programObj: {
+    [key: string]: {
+      position: { top: number },
+      programs: ProgramItem[]
+    }
+  } = {};
 
   const programs = data.map((program, index) => {
     if (program?.position && program?.data) {
@@ -264,6 +265,8 @@ export const getConvertedPrograms = ({
 
     // console.log('itemIndex', isPrevSameChannel, prevProgram, itemIndex)
 
+    const offsetTop = isRow && isScrollBar ? (theme?.scrollbar?.size || 0) : 0;
+
     const programPosition = getProgramPosition({
       program,
       nextProgram: isNextSameChannel ? nextProgram : undefined,
@@ -278,15 +281,21 @@ export const getConvertedPrograms = ({
       tillMapKey,
       isRow,
       isScrollBar,
-      theme
+      theme,
+      offsetTop
     });
 
     if (isRow) {
       if (!programObj[channelId]) {
-        programObj[channelId] = []
+        programObj[channelId] = {
+          position: {
+            top: (itemHeight + offsetTop) * channelIndex,
+          },
+          programs: [],
+        }
       }
 
-      programObj[channelId].push(programPosition)
+      programObj[channelId].programs.push(programPosition)
     }
 
     return programPosition;
@@ -335,7 +344,7 @@ export const getItemVisibility = (
   itemOverscan: number,
   params: any = {}
 ) => {
-  const { layoutProps = {} } = params;
+  const { layoutProps = {}, isInRow } = params;
 
   if (layoutProps.scrollX || layoutProps.scrollX === 0) {
     scrollX = layoutProps.scrollX
@@ -353,9 +362,9 @@ export const getItemVisibility = (
     containerHeight = layoutProps.layoutHeight
   }
 
-  // console.log('layoutProps getItemVisibility', layoutProps, scrollX, scrollY)
+  // console.log('layoutProps getItemVisibility', position, layoutProps, scrollX, scrollY)
 
-  if (position.width <= 0) {
+  if (position.width <= 0 && !isInRow) {
     return false;
   }
 
@@ -366,6 +375,18 @@ export const getItemVisibility = (
   if (scrollY + containerHeight <= position.top) {
     return false;
   }
+
+  // if (isInRow) {
+  //   if (scrollY <= position.top + itemOverscan * 3) {
+  //     return true;
+  //   }
+  //
+  //   if (scrollY + containerHeight > position.top) {
+  //     return true;
+  //   }
+  //
+  //   return false
+  // }
 
   if (
     scrollX + containerWidth >= position.left &&

@@ -27,6 +27,7 @@ export interface ProgramPosition {
   isRow?: boolean;
   isScrollBar?: boolean;
   theme?: Theme;
+  offsetTop?: number;
 }
 
 export interface Channel {

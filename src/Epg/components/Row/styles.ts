@@ -4,7 +4,8 @@ import { Theme } from "../../helpers";
 export const Wrapper = styled.div<{
 
 }>`
-    position: relative;
+    position: absolute;
+    width: 100%;
 
     :hover {
         .arrow {
@@ -14,13 +15,12 @@ export const Wrapper = styled.div<{
 `;
 
 export const RowBox = styled.div<{
-  width: number;
   height: number;
   theme?: Theme;
 }>`
+    //position: absolute;
     background: ${({ theme }) => theme.primary[900]};
     height: ${({ height }) => height}px;
-    width: ${({ width }) => width}px;
 `;
 
 export const ScrollBox = styled.div<{ theme?: Theme; isRTL?: boolean; isScrollBar?: boolean; height: number }>`

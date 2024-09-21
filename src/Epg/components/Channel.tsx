@@ -27,6 +27,9 @@ export function Channel<T extends ChannelWithPosition>({
       onClick={() => onClick?.(channel)}
       {...position}
       {...rest}
+      style={{
+        top: position.top
+      }}
     >
       <ChannelLogo src={channel[logoChannelMapKey]} alt="Logo"/>
     </ChannelBox>
