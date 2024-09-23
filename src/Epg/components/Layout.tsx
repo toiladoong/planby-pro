@@ -76,9 +76,12 @@ interface LayoutProps {
   renderRow?: (v: {
     channelId: string;
     programs: ProgramItem[];
-    row: any
+    row: any,
+    getPrograms?: (params: any) => ProgramItem[];
+    itemWidth?: number;
   }) => React.ReactNode;
   containerRef?: any;
+  getPrograms?: (params: any) => ProgramItem[];
   getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
 }
 
@@ -109,6 +112,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
       isRow = false,
       isScrollBar = false,
       isScrollToNow = false,
+      getPrograms,
       getLiveProgram,
     } = props;
 
@@ -188,13 +192,13 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
               const position: any = programObj[channelId]?.position;
               const programs = programObj[channelId]?.programs;
 
-              const isVisible = isProgramVisible(position, {
-                isInRow: true
-              });
-
-              if (!isVisible) {
-                return null
-              }
+              // const isVisible = isProgramVisible(position, {
+              //   isInRow: true
+              // });
+              //
+              // if (!isVisible) {
+              //   return null
+              // }
 
               const row = (
                 <Row
@@ -220,7 +224,9 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
                 return renderRow({
                   channelId,
                   programs,
-                  row
+                  row,
+                  getPrograms,
+                  itemWidth
                 })
               }
 

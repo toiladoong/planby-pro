@@ -29,7 +29,7 @@ export const ScrollBox = styled.div<{ theme?: Theme; isRTL?: boolean; isScrollBa
     overflow: auto;
     //overflow-x: auto;
     //overflow-y: hidden;
-    scroll-behavior: smooth;
+    //scroll-behavior: smooth;
     height: ${({ height, theme, isScrollBar }) => `${isScrollBar ? height + (theme.scrollbar.size || 0) : height}px`};
     background: ${({ theme }) => theme.primary[900]};
 

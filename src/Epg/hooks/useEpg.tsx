@@ -148,26 +148,28 @@ export function useEpg({
 
   const startDateTime = formatTime(startDate);
   const endDateTime = formatTime(endDate);
-  const { programs, programObj } = React.useMemo(
-    () =>
-      getConvertedPrograms({
-        data: epg,
-        channels,
-        startDate: startDateTime,
-        endDate: endDateTime,
-        itemWidth,
-        itemHeight,
-        hourWidth,
-        channelMapKey,
-        programChannelMapKey,
-        sinceMapKey,
-        tillMapKey,
-        isRow,
-        isScrollBar,
-        theme
-      }),
-    [epg, channels, startDateTime, endDateTime, itemWidth, itemHeight, hourWidth]
-  );
+
+  const getPrograms = React.useCallback((params = {}) => {
+    return getConvertedPrograms({
+      data: epg,
+      channels,
+      startDate: startDateTime,
+      endDate: endDateTime,
+      itemWidth,
+      itemHeight,
+      hourWidth,
+      channelMapKey,
+      programChannelMapKey,
+      sinceMapKey,
+      tillMapKey,
+      isRow,
+      isScrollBar,
+      theme,
+      ...params
+    })
+  }, [epg, channels, startDateTime, endDateTime, itemWidth, itemHeight, hourWidth])
+
+  const { programs, programObj } = getPrograms();
 
   // console.log('programs', programs)
 
@@ -235,6 +237,7 @@ export function useEpg({
     channelMapKey,
     logoChannelMapKey,
     getLiveProgram,
+    getPrograms,
     ...dayWidthResourcesProps,
     containerRef,
     ref: scrollBoxRef,

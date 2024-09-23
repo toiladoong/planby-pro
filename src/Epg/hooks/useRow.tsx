@@ -29,6 +29,7 @@ interface useRowProps {
   lastProgram?: ProgramItem;
   onReachBeginning?: (params: any) => void;
   onReachEnd?: (params: any) => void;
+  scrollBoxRef?: any;
 }
 
 export function useRow({
@@ -46,11 +47,17 @@ export function useRow({
   firstProgram,
   lastProgram,
   onReachBeginning,
-  onReachEnd
+  onReachEnd,
+  scrollBoxRef
 }: useRowProps) {
   const useIsomorphicEffect = useIsomorphicLayoutEffect();
 
-  const scrollBoxRef = React.useRef<HTMLDivElement>(null);
+  const scrollBoxDefaultRef = React.useRef<HTMLDivElement>(null);
+
+  if (!scrollBoxRef) {
+    scrollBoxRef = scrollBoxDefaultRef
+  }
+
   const scrollToNowRef = React.useRef(false);
   //-------- State --------
   const [scrollY, setScrollY] = React.useState<number>(0);
@@ -132,7 +139,10 @@ export function useRow({
         }
 
         // console.log('handleOnScrollLeft', left)
-        scrollBoxRef.current.scrollLeft = left;
+        scrollBoxRef.current.scrollTo({
+          left,
+          behavior: 'smooth'
+        })
       }
     }, [width, firstProgram]);
 
@@ -156,9 +166,24 @@ export function useRow({
         }
 
         // console.log('handleOnScrollRight', right)
-        scrollBoxRef.current.scrollLeft = right;
+        scrollBoxRef.current.scrollTo({
+          left: right,
+          behavior: 'smooth'
+        })
       }
     }, [width, layoutWidth, sidebarWidth, lastProgram]);
+
+  const handleScrollTo = React.useCallback(
+    (value: number, params = {}) => {
+      const { behavior = 'auto' } = params;
+
+      if (scrollBoxRef?.current) {
+        scrollBoxRef.current.scrollTo({
+          left: value,
+          behavior
+        })
+      }
+    }, []);
 
   // -------- Effects --------
   useIsomorphicEffect(() => {
@@ -178,5 +203,6 @@ export function useRow({
     onScrollTop: handleOnScrollTop,
     onScrollLeft: handleOnScrollLeft,
     onScrollRight: handleOnScrollRight,
+    scrollTo: handleScrollTo,
   };
 }

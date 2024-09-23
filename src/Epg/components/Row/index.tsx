@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 
 import { useRow } from "../../hooks/useRow";
 
@@ -27,6 +27,8 @@ interface RowProps {
   getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
   onReachBeginning?: () => void;
   onReachEnd?: () => void;
+  offsetLeft?: number;
+  scrollBoxRef?: any;
 }
 
 export function Row({
@@ -47,7 +49,9 @@ export function Row({
   itemWidth = 0,
   getLiveProgram,
   onReachBeginning,
-  onReachEnd
+  onReachEnd,
+  offsetLeft,
+  scrollBoxRef: customScrollBoxRef
 }: RowProps) {
   const liveProgram = getLiveProgram?.(programs);
   const firstProgram = programs[0];
@@ -59,6 +63,7 @@ export function Row({
 
   const { scrollBoxRef, ...layoutProps } = useRow({
     containerRef,
+    scrollBoxRef: customScrollBoxRef,
     width,
     height,
     sidebarWidth,
@@ -75,9 +80,14 @@ export function Row({
     layoutWidth
   });
 
-  const { scrollX, onScroll, onScrollLeft, onScrollRight } = layoutProps;
+  const { scrollX, onScroll, onScrollLeft, onScrollRight, scrollTo } = layoutProps;
 
   // console.log('layoutProps Row', layoutProps)
+  useEffect(() => {
+    if (offsetLeft || offsetLeft === 0) {
+      scrollTo(offsetLeft)
+    }
+  }, [offsetLeft])
 
   return (
     <Wrapper

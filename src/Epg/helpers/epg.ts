@@ -13,7 +13,7 @@ import { HOUR_IN_MINUTES } from "./variables";
 import {
   formatTime,
   roundToMinutes,
-  isYesterday as isYesterdayTime,
+  // isYesterday as isYesterdayTime,
 } from "./time";
 import { getDate } from "./common";
 
@@ -150,8 +150,6 @@ export const getProgramPosition = ({
     item.till = formatTime(till);
   }
 
-  const isYesterday = isYesterdayTime(item.since, startDate);
-
   let width = itemWidth || getPositionX({
     since: item.since,
     till: item.till,
@@ -180,9 +178,18 @@ export const getProgramPosition = ({
     itemWidth
   });
 
-  if (isYesterday) left = 0;
+  // if (startDate) {
+  //   const isYesterday = isYesterdayTime(item.since, startDate);
+  //
+  //   if (isYesterday) {
+  //     left = 0;
+  //   }
+  // }
+
   // If item has negative top position, it means that it is not visible in this day
-  if (top < 0) width = 0;
+  if (top < 0) {
+    width = 0
+  }
 
   const position = {
     width,
@@ -263,8 +270,6 @@ export const getConvertedPrograms = ({
 
     itemIndex = isPrevSameChannel ? itemIndex + 1 : 0;
 
-    // console.log('itemIndex', isPrevSameChannel, prevProgram, itemIndex)
-
     const offsetTop = isRow && isScrollBar ? (theme?.scrollbar?.size || 0) : 0;
 
     const programPosition = getProgramPosition({
@@ -284,6 +289,8 @@ export const getConvertedPrograms = ({
       theme,
       offsetTop
     });
+
+    // console.log('itemIndex', itemIndex, programPosition)
 
     if (isRow) {
       if (!programObj[channelId]) {
