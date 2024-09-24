@@ -29,12 +29,14 @@ interface RowProps {
   onReachEnd?: () => void;
   offsetLeft?: number;
   scrollBoxRef?: any;
+  loading?: boolean;
 }
 
 export function Row({
   isRTL = false,
   isScrollBar,
   isScrollToNow,
+  loading,
   width,
   height,
   position,

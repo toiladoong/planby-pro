@@ -61,6 +61,7 @@ interface useEpgProps {
   tillMapKey?: string;
   maxLength?: number;
   getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
+  onLoadData?: (params: any) => void
 }
 
 const defaultStartDateTime = formatTime(startOfToday());
@@ -93,7 +94,8 @@ export function useEpg({
   programChannelMapKey,
   sinceMapKey,
   tillMapKey,
-  getLiveProgram
+  getLiveProgram,
+  onLoadData
 }: useEpgProps) {
   if (itemWidth) {
     isTimeline = false;
@@ -126,6 +128,9 @@ export function useEpg({
   });
 
   const { scrollX, scrollY, layoutWidth, layoutHeight } = layoutProps;
+
+  // console.log('scrollY', scrollY)
+
   const {
     onScroll,
     onScrollToNow,
@@ -238,6 +243,7 @@ export function useEpg({
     logoChannelMapKey,
     getLiveProgram,
     getPrograms,
+    onLoadData,
     ...dayWidthResourcesProps,
     containerRef,
     ref: scrollBoxRef,

@@ -32,6 +32,25 @@ interface useRowProps {
   scrollBoxRef?: any;
 }
 
+function scrollToWithCallback({ element, left, callback }: { element: any, left: number, callback: () => void }) {
+  element.scrollTo({
+    left,
+    behavior: 'smooth'
+  });
+
+  function checkIfScrollComplete() {
+    // console.log('scrollLeft checkIfScrollComplete', element.scrollLeft)
+
+    if (element.scrollLeft === left) {
+      callback();
+    } else {
+      requestAnimationFrame(checkIfScrollComplete);
+    }
+  }
+
+  requestAnimationFrame(checkIfScrollComplete);
+}
+
 export function useRow({
   layoutWidth,
   height,
@@ -76,7 +95,21 @@ export function useRow({
 
   const handleOnScroll = React.useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent> & { target: Element }) => {
-      handleScrollDebounced({ y: e.target.scrollTop, x: e.target.scrollLeft });
+      let y;
+      let x;
+
+      if (scrollBoxRef?.current) {
+        y = scrollBoxRef.current.scrollTop;
+        x = scrollBoxRef.current.scrollLeft;
+      } else {
+        y = e.target.scrollTop;
+        x = e.target.scrollLeft
+      }
+
+      handleScrollDebounced({
+        y,
+        x
+      });
     },
     [handleScrollDebounced]
   );
@@ -132,16 +165,18 @@ export function useRow({
           left = scrollBoxRef.current.scrollLeft - itemWidth * 2;
         }
 
-        if (left <= 0) {
-          onReachBeginning?.({
-            firstProgram
-          });
-        }
+        console.log('handleOnScrollLeft', left)
 
-        // console.log('handleOnScrollLeft', left)
-        scrollBoxRef.current.scrollTo({
-          left,
-          behavior: 'smooth'
+        scrollToWithCallback({
+          element: scrollBoxRef.current,
+          left: Math.max(0, left),
+          callback: () => {
+            if (left <= 0) {
+              onReachBeginning?.({
+                firstProgram
+              });
+            }
+          }
         })
       }
     }, [width, firstProgram]);
@@ -159,17 +194,16 @@ export function useRow({
 
         // console.log('handleOnScrollRight', right, width - layoutWidth)
 
+        scrollBoxRef.current.scrollTo({
+          left: right,
+          behavior: 'smooth'
+        });
+
         if (right >= (width - layoutWidth)) {
           onReachEnd?.({
             lastProgram
           });
         }
-
-        // console.log('handleOnScrollRight', right)
-        scrollBoxRef.current.scrollTo({
-          left: right,
-          behavior: 'smooth'
-        })
       }
     }, [width, layoutWidth, sidebarWidth, lastProgram]);
 

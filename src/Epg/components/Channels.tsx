@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 // Import interfaces
 import { ChannelWithPosition } from "../helpers/types";
 
@@ -18,22 +18,58 @@ interface ChannelsProps {
   renderChannel?: (v: { channel: ChannelWithPosition }) => React.ReactNode;
   channelMapKey?: string
   logoChannelMapKey?: string
+  onLoadData?: (params: any) => void
 }
 
 const { Box } = ChannelsStyled;
 
 export function Channels(props: ChannelsProps) {
-  const { channels, scrollY, sidebarWidth, renderChannel, channelMapKey = 'uuid', logoChannelMapKey } = props;
+  const {
+    channels,
+    scrollY,
+    sidebarWidth,
+    renderChannel,
+    channelMapKey = 'uuid',
+    logoChannelMapKey,
+    onLoadData
+  } = props;
   const { isRTL, isTimeline, isChannelVisible } = props;
 
+  const visibleChannels = React.useMemo(() => {
+    return channels.reduce((array: ChannelWithPosition[], channel: ChannelWithPosition) => {
+      const isVisible = isChannelVisible(channel.position);
+
+      if (isVisible) {
+        return [
+          ...array,
+          channel
+        ]
+      }
+
+      return array
+    }, [])
+  }, [isChannelVisible, channels])
+
   const renderChannels = (channel: ChannelWithPosition) => {
-    const isVisible = isChannelVisible(channel.position);
-    if (isVisible) {
-      if (renderChannel) return renderChannel({ channel });
-      return <Channel key={channel[channelMapKey]} channel={channel} logoChannelMapKey={logoChannelMapKey}/>;
+    if (renderChannel) {
+      return renderChannel({ channel })
     }
-    return null;
+
+    return (
+      <Channel
+        key={channel[channelMapKey]}
+        channel={channel}
+        logoChannelMapKey={logoChannelMapKey}
+      />
+    );
   };
+
+  useEffect(() => {
+    // console.log('visibleChannels', visibleChannels)
+    onLoadData?.({
+      visibleChannels
+    })
+  }, [JSON.stringify(visibleChannels)]);
 
   return (
     <Box
@@ -43,7 +79,7 @@ export function Channels(props: ChannelsProps) {
       width={sidebarWidth}
       bottom={scrollY}
     >
-      {channels.map(renderChannels)}
+      {visibleChannels.map(renderChannels)}
     </Box>
   );
 }

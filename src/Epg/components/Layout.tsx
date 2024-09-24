@@ -83,6 +83,7 @@ interface LayoutProps {
   containerRef?: any;
   getPrograms?: (params: any) => ProgramItem[];
   getLiveProgram?: (programs: ProgramItem[]) => ProgramItem;
+  onLoadData?: (params: any) => void
 }
 
 const { ScrollBox, RowContent, Content } = EpgStyled;
@@ -117,6 +118,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
     } = props;
 
     const {
+      onLoadData,
       onScroll,
       isProgramVisible,
       isChannelVisible,
@@ -274,6 +276,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
             renderChannel={renderChannel}
             channelMapKey={channelMapKey}
             logoChannelMapKey={logoChannelMapKey}
+            onLoadData={onLoadData}
           />
         )}
         {renderContent}
