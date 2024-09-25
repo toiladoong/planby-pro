@@ -30,6 +30,7 @@ interface useRowProps {
   onReachBeginning?: (params: any) => void;
   onReachEnd?: (params: any) => void;
   scrollBoxRef?: any;
+  isSkeleton?: boolean;
 }
 
 function scrollToWithCallback({ element, left, callback }: { element: any, left: number, callback: () => void }) {
@@ -67,7 +68,8 @@ export function useRow({
   lastProgram,
   onReachBeginning,
   onReachEnd,
-  scrollBoxRef
+  scrollBoxRef,
+  isSkeleton
 }: useRowProps) {
   const useIsomorphicEffect = useIsomorphicLayoutEffect();
 
@@ -165,19 +167,26 @@ export function useRow({
           left = scrollBoxRef.current.scrollLeft - itemWidth * 2;
         }
 
-        console.log('handleOnScrollLeft', left)
+        // console.log('handleOnScrollLeft', left)
 
-        scrollToWithCallback({
-          element: scrollBoxRef.current,
-          left: Math.max(0, left),
-          callback: () => {
-            if (left <= 0) {
-              onReachBeginning?.({
-                firstProgram
-              });
+        if (onReachBeginning) {
+          scrollToWithCallback({
+            element: scrollBoxRef.current,
+            left: Math.max(0, left),
+            callback: () => {
+              if (left <= 0) {
+                onReachBeginning?.({
+                  firstProgram
+                });
+              }
             }
-          }
-        })
+          })
+        } else {
+          scrollBoxRef.current.scrollTo({
+            left,
+            behavior: 'smooth'
+          });
+        }
       }
     }, [width, firstProgram]);
 
@@ -221,11 +230,11 @@ export function useRow({
 
   // -------- Effects --------
   useIsomorphicEffect(() => {
-    if (scrollBoxRef?.current && isToday && isScrollToNow && !scrollToNowRef.current) {
+    if (scrollBoxRef?.current && isToday && isScrollToNow && !scrollToNowRef.current && !isSkeleton) {
       handleOnScrollToNow();
       scrollToNowRef.current = true;
     }
-  }, [height, width, startDate, isToday, isScrollToNow, handleOnScrollToNow, liveProgram]);
+  }, [height, width, isToday, isSkeleton, isScrollToNow, handleOnScrollToNow, liveProgram]);
 
   return {
     containerRef,

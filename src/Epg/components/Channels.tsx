@@ -19,6 +19,7 @@ interface ChannelsProps {
   channelMapKey?: string
   logoChannelMapKey?: string
   onLoadData?: (params: any) => void
+  layoutHeight: number
 }
 
 const { Box } = ChannelsStyled;
@@ -31,7 +32,8 @@ export function Channels(props: ChannelsProps) {
     renderChannel,
     channelMapKey = 'uuid',
     logoChannelMapKey,
-    onLoadData
+    onLoadData,
+    layoutHeight
   } = props;
   const { isRTL, isTimeline, isChannelVisible } = props;
 
@@ -66,14 +68,16 @@ export function Channels(props: ChannelsProps) {
 
   useEffect(() => {
     // console.log('visibleChannels', visibleChannels)
-    onLoadData?.({
-      visibleChannels
-    })
-  }, [JSON.stringify(visibleChannels)]);
+    if (layoutHeight > 0) {
+      onLoadData?.({
+        visibleChannels
+      })
+    }
+  }, [JSON.stringify(visibleChannels), layoutHeight]);
 
   return (
     <Box
-      data-testid="sidebar"
+      className="sidebar"
       isRTL={isRTL}
       isTimeline={isTimeline}
       width={sidebarWidth}

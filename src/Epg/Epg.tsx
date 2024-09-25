@@ -53,14 +53,16 @@ export const Epg = React.forwardRef<HTMLDivElement, EpgProps>(
       <ThemeProvider theme={theme}>
         <Global styles={epgGlobalStyles} />
         <Container
-          className="planby"
+          className="epg-container"
           data-testid="container"
           width={width}
           height={height}
           ref={containerRef}
           {...rest}
         >
-          <Wrapper>
+          <Wrapper
+            className="epg-wrapper"
+          >
             {isSidebar && isTimeline && (
               <Box
                 isRTL={isRTL}

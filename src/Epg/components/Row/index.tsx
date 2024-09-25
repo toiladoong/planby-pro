@@ -36,7 +36,7 @@ export function Row({
   isRTL = false,
   isScrollBar,
   isScrollToNow,
-  loading,
+  // loading,
   width,
   height,
   position,
@@ -58,6 +58,7 @@ export function Row({
   const liveProgram = getLiveProgram?.(programs);
   const firstProgram = programs[0];
   const lastProgram = programs[programs.length - 1];
+  const isSkeleton = !!programs.find(program => program?.data?.skeleton);
 
   if (!width) {
     width = programs.length * itemWidth;
@@ -79,7 +80,8 @@ export function Row({
     lastProgram,
     onReachBeginning,
     onReachEnd,
-    layoutWidth
+    layoutWidth,
+    isSkeleton
   });
 
   const { scrollX, onScroll, onScrollLeft, onScrollRight, scrollTo } = layoutProps;

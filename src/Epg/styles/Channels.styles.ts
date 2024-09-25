@@ -14,7 +14,7 @@ export const Box = styled.div<{
   bottom: ${({ bottom }) => bottom}px;
   left: 0;
   z-index: ${Layers.Sidebar};
-  background-color: ${({ theme }) => theme.primary[900]};
+  //background-color: ${({ theme }) => theme.primary[900]};
 
   ${({ isRTL }) => isRTL && `transform: scale(-1,1)`};
 `;

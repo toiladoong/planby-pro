@@ -6,7 +6,7 @@ export const ChannelBox = styled.div<{
   theme?: Theme;
 }>`
   position: absolute;
-  height: ${({ height }) => height + 10}px;
+  height: ${({ height }) => height}px;
   width: 100%;
   display: flex;
   align-items: center;

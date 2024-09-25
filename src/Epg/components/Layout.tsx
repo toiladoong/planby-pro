@@ -184,7 +184,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
     if (isRow) {
       renderContent = (
         <RowContent
-          data-testid="content"
+          className="epg-content"
           sidebarWidth={sidebarWidth}
           isSidebar={isSidebar}
           height={contentHeight}
@@ -240,7 +240,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
     } else {
       renderContent = (
         <Content
-          data-testid="content"
+          className="epg-content"
           sidebarWidth={sidebarWidth}
           isSidebar={isSidebar}
           width={dayWidth}
@@ -252,7 +252,12 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
     }
 
     return (
-      <ScrollBox isRTL={isRTL} ref={scrollBoxRef} onScroll={onScroll}>
+      <ScrollBox
+        className="epg-layout"
+        isRTL={isRTL}
+        ref={scrollBoxRef}
+        onScroll={onScroll}
+      >
         {isLine && isFuture && (
           <Line
             dayWidth={dayWidth}
@@ -277,6 +282,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
             channelMapKey={channelMapKey}
             logoChannelMapKey={logoChannelMapKey}
             onLoadData={onLoadData}
+            layoutHeight={layoutHeight}
           />
         )}
         {renderContent}

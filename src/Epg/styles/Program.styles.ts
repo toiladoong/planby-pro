@@ -11,6 +11,7 @@ export const ProgramContent = styled.div<{
   isLive: boolean;
   width: number;
   theme?: Theme;
+  background?: string;
 }>`
   position: relative;
   display: flex;
@@ -20,19 +21,16 @@ export const ProgramContent = styled.div<{
   padding: 10px ${({ width }) => (width < 30 ? 4 : 20)}px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.4s ease-in-out;
+  //transition: all 0.4s ease-in-out;
   background: ${({ theme: { primary } }) =>
     `linear-gradient(to right, ${primary[600]}, ${primary[600]})`};
   z-index: ${Layers.Program};
 
   &:hover {
-    background: ${({ theme: { gradient } }) =>
-      `linear-gradient(to right, ${gradient.blue[900]}, ${gradient.blue[600]})`};
+    background: ${({ theme: { gradient }, background }) => background || `linear-gradient(to right, ${gradient.blue[900]}, ${gradient.blue[600]})`};
   }
 
-  ${({ isLive, theme: { gradient } }) =>
-    isLive &&
-    `background: linear-gradient(to right, ${gradient.blue[900]}, ${gradient.blue[600]},${gradient.blue[300]})`}
+  ${({ isLive, theme: { gradient } }) => isLive && `background: linear-gradient(to right, ${gradient.blue[900]}, ${gradient.blue[600]},${gradient.blue[300]})`}
 `;
 
 export const ProgramFlex = styled.div`

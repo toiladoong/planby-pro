@@ -23,7 +23,7 @@ export function Channel<T extends ChannelWithPosition>({
   const { position } = channel;
   return (
     <ChannelBox
-      data-testid="sidebar-item"
+      className="sidebar-item"
       onClick={() => onClick?.(channel)}
       {...position}
       {...rest}
