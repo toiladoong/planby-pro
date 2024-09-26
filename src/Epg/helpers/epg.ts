@@ -246,6 +246,8 @@ export const getConvertedPrograms = ({
     }
   } = {};
 
+  // console.log('data programs', data)
+
   const programs = data.map((program, index) => {
     if (program?.position && program?.data) {
       program = program?.data as Program;
@@ -255,6 +257,8 @@ export const getConvertedPrograms = ({
 
     const channelId = program[programChannelMapKey];
     const channelIndex = channels.findIndex((channel) => channel[channelMapKey] === channelId);
+
+    // console.log('channels', channels)
 
     let prevProgram = data[index - 1];
     let nextProgram = data[index + 1];

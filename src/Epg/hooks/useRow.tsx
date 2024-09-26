@@ -80,11 +80,25 @@ export function useRow({
     scrollBoxRef = scrollBoxDefaultRef
   }
 
-  const scrollToNowRef = React.useRef(false);
+  // const scrollToNowRef = React.useRef(false);
   //-------- State --------
   const [scrollY, setScrollY] = React.useState<number>(0);
   const [scrollX, setScrollX] = React.useState<number>(0);
   const isToday = isTodayFns(new Date(startDate));
+
+  const handleSetAttribute = (scrollLeft: number) => {
+    if (wrapperRef?.current) {
+      if (scrollLeft <= 0) {
+        wrapperRef.current.setAttribute('data-state', 'beginning');
+      } else {
+        if (scrollLeft >= (width - layoutWidth + sidebarWidth)) {
+          wrapperRef.current.setAttribute('data-state', 'end');
+        } else {
+          wrapperRef.current.removeAttribute('data-state');
+        }
+      }
+    }
+  }
 
   // -------- Handlers --------
   const handleScrollDebounced = useDebouncedCallback(
@@ -109,19 +123,9 @@ export function useRow({
         scrollLeft = e.target.scrollLeft
       }
 
-      console.log('scrollLeft', scrollLeft);
+      // console.log('scrollLeft', scrollLeft);
 
-      if (wrapperRef?.current) {
-        if (scrollLeft <= 0) {
-          wrapperRef.current.setAttribute('data-state', 'beginning');
-        } else {
-          if (scrollLeft >= (width - layoutWidth)) {
-            wrapperRef.current.setAttribute('data-state', 'end');
-          } else {
-            wrapperRef.current.removeAttribute('data-state');
-          }
-        }
-      }
+      handleSetAttribute(scrollLeft);
 
       handleScrollDebounced({
         y: scrollTop,
@@ -152,12 +156,10 @@ export function useRow({
         })
       }
 
-      scrollBoxRef.current.scrollLeft = scrollPosition;
-
-      // scrollBoxRef.current.scrollTo({
-      //   left: scrollPosition,
-      //   behavior: 'auto'
-      // });
+      scrollBoxRef.current.scrollTo({
+        left: scrollPosition,
+        behavior: 'auto'
+      });
     }
   }, [isToday, startDate, endDate, width, sidebarWidth, hourWidth, liveProgram]);
 
@@ -223,7 +225,7 @@ export function useRow({
           behavior: 'smooth'
         });
 
-        if (right >= (width - layoutWidth)) {
+        if (right >= (width - layoutWidth + sidebarWidth)) {
           onReachEnd?.({
             lastProgram
           });
@@ -245,11 +247,23 @@ export function useRow({
 
   // -------- Effects --------
   useIsomorphicEffect(() => {
-    if (scrollBoxRef?.current && isToday && isScrollToNow && !scrollToNowRef.current && !isSkeleton) {
-      handleOnScrollToNow();
-      scrollToNowRef.current = true;
+    if (scrollBoxRef?.current) {
+      if (isToday && isScrollToNow && !isSkeleton) {
+        handleOnScrollToNow();
+        // scrollToNowRef.current = true;
+      }
     }
-  }, [height, width, isToday, isSkeleton, isScrollToNow, handleOnScrollToNow, liveProgram]);
+  }, [width, isToday, isSkeleton, isScrollToNow]);
+
+  useIsomorphicEffect(() => {
+    // console.log('layoutWidth', layoutWidth)
+
+    if (scrollBoxRef?.current) {
+      const scrollLeft = scrollBoxRef.current.scrollLeft;
+
+      handleSetAttribute(scrollLeft);
+    }
+  }, [height, width, layoutWidth, sidebarWidth]);
 
   return {
     containerRef,

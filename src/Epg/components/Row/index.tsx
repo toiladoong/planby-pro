@@ -110,7 +110,7 @@ export function Row({
         <ArrowPrev
           className="arrow arrow-prev"
           onClick={() => {
-            console.log('ArrowPrev')
+            // console.log('ArrowPrev')
             onScrollLeft()
           }}
         >
@@ -152,7 +152,7 @@ export function Row({
         <ArrowNext
           className="arrow arrow-next"
           onClick={() => {
-            console.log('ArrowNext')
+            // console.log('ArrowNext')
             onScrollRight()
           }}
         >

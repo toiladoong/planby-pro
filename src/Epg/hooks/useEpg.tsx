@@ -176,6 +176,8 @@ export function useEpg({
 
   const { programs, programObj } = getPrograms();
 
+  // console.log('programObj', programObj)
+
   // console.log('programs', programs)
 
   // -------- Handlers --------

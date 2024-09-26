@@ -195,7 +195,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
               const position: any = programObj[channelId]?.position;
               const programs = programObj[channelId]?.programs;
 
-              console.log('position channelId', channelId, position);
+              // console.log('position channelId', channelId, position);
 
               // const isVisible = isProgramVisible(position, {
               //   isInRow: true

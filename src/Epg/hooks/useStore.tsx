@@ -36,14 +36,14 @@ function createStore(initialState: any = {}, handlers?: any) {
 }
 
 export const useStore = (params: any = {}) => {
-  const { initialState = {}, storeKey, isWithState } = params
+  const { initialState = {}, storeKey, isWithState, isServer } = params
   let { handlers } = params
 
   // console.log('storeKey', storeKey)
 
   const storeRef: any = useRef()
   const getStore = useCallback(({ storeKey, storeRef, stores }: any) => {
-    if (storeKey && stores[storeKey]) {
+    if (storeKey && stores[storeKey] && !isServer) {
       return stores[storeKey]
     }
 
@@ -51,7 +51,7 @@ export const useStore = (params: any = {}) => {
       storeRef.current = createStore(initialState)
     }
 
-    if (!storeKey) {
+    if (!storeKey || isServer) {
       return storeRef.current
     }
 

@@ -88,7 +88,7 @@ export function useLayout({
         hourWidth
       });
       const scrollNow = scrollPosition - clientWidth / 2 + sidebarWidth;
-      console.log('scrollBoxRef.current useLayout', scrollBoxRef.current, scrollNow)
+      // console.log('scrollBoxRef.current useLayout', scrollBoxRef.current, scrollNow)
       scrollBoxRef.current.scrollLeft = scrollNow;
     }
   }, [isToday, startDate, endDate, width, sidebarWidth, hourWidth]);
