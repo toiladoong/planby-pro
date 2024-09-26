@@ -14,6 +14,10 @@ export const ChannelBox = styled.div<{
   background-color: ${({ theme }) => theme.primary[900]};
 `;
 
+export const ChannelContent = styled.div`
+  
+`;
+
 export const ChannelLogo = styled.img`
   max-height: 60px;
   max-width: 60px;

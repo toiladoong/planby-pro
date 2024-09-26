@@ -12,6 +12,20 @@ export const Wrapper = styled.div<{
             opacity: 1;
         }
     }
+
+    &[data-state="beginning"] {
+        .arrow-prev {
+            visibility: hidden;
+            pointer-events: none;
+        }
+    }
+
+    &[data-state="end"] {
+        .arrow-next {
+            visibility: hidden;
+            pointer-events: none;
+        }
+    }
 `;
 
 export const RowBox = styled.div<{

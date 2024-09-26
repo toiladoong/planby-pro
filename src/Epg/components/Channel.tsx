@@ -12,7 +12,7 @@ interface ChannelProps<T> {
   logoChannelMapKey?: string
 }
 
-const { ChannelBox, ChannelLogo } = ChannelStyled;
+const { ChannelBox, ChannelContent, ChannelLogo } = ChannelStyled;
 
 export function Channel<T extends ChannelWithPosition>({
   channel,
@@ -23,7 +23,7 @@ export function Channel<T extends ChannelWithPosition>({
   const { position } = channel;
   return (
     <ChannelBox
-      className="sidebar-item"
+      className="channel-box"
       onClick={() => onClick?.(channel)}
       {...position}
       {...rest}
@@ -31,7 +31,13 @@ export function Channel<T extends ChannelWithPosition>({
         top: position.top
       }}
     >
-      <ChannelLogo src={channel[logoChannelMapKey]} alt="Logo"/>
+      <ChannelContent className="channel-content">
+        <ChannelLogo
+          className="channel-logo"
+          src={channel[logoChannelMapKey]}
+          alt="Logo"
+        />
+      </ChannelContent>
     </ChannelBox>
   );
 }

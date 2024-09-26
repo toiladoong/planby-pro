@@ -251,6 +251,8 @@ export const getConvertedPrograms = ({
       program = program?.data as Program;
     }
 
+    // console.log('channels', channels)
+
     const channelId = program[programChannelMapKey];
     const channelIndex = channels.findIndex((channel) => channel[channelMapKey] === channelId);
 

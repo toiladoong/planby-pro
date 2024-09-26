@@ -141,12 +141,13 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
 
       if (isVisible) {
         const options = getProgramOptions(program);
-        if (renderProgram)
+        if (renderProgram) {
           return renderProgram({
             program: options,
             isRTL,
-            isBaseTimeFormat,
+            isBaseTimeFormat
           });
+        }
         return (
           <Program
             key={program.data.id}
@@ -194,6 +195,8 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
               const position: any = programObj[channelId]?.position;
               const programs = programObj[channelId]?.programs;
 
+              console.log('position channelId', channelId, position);
+
               // const isVisible = isProgramVisible(position, {
               //   isInRow: true
               // });
@@ -206,6 +209,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
                 <Row
                   isRTL={isRTL}
                   isScrollBar={isScrollBar}
+                  channelId={channelId}
                   height={itemHeight}
                   position={position}
                   programs={programs}

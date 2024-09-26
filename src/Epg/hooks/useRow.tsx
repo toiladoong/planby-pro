@@ -73,6 +73,7 @@ export function useRow({
 }: useRowProps) {
   const useIsomorphicEffect = useIsomorphicLayoutEffect();
 
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
   const scrollBoxDefaultRef = React.useRef<HTMLDivElement>(null);
 
   if (!scrollBoxRef) {
@@ -97,23 +98,37 @@ export function useRow({
 
   const handleOnScroll = React.useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent> & { target: Element }) => {
-      let y;
-      let x;
+      let scrollTop;
+      let scrollLeft;
 
       if (scrollBoxRef?.current) {
-        y = scrollBoxRef.current.scrollTop;
-        x = scrollBoxRef.current.scrollLeft;
+        scrollTop = scrollBoxRef.current.scrollTop;
+        scrollLeft = scrollBoxRef.current.scrollLeft;
       } else {
-        y = e.target.scrollTop;
-        x = e.target.scrollLeft
+        scrollTop = e.target.scrollTop;
+        scrollLeft = e.target.scrollLeft
+      }
+
+      console.log('scrollLeft', scrollLeft);
+
+      if (wrapperRef?.current) {
+        if (scrollLeft <= 0) {
+          wrapperRef.current.setAttribute('data-state', 'beginning');
+        } else {
+          if (scrollLeft >= (width - layoutWidth)) {
+            wrapperRef.current.setAttribute('data-state', 'end');
+          } else {
+            wrapperRef.current.removeAttribute('data-state');
+          }
+        }
       }
 
       handleScrollDebounced({
-        y,
-        x
+        y: scrollTop,
+        x: scrollLeft
       });
     },
-    [handleScrollDebounced]
+    [handleScrollDebounced, width, layoutWidth]
   );
 
   const handleOnScrollToNow = React.useCallback(() => {
@@ -238,6 +253,7 @@ export function useRow({
 
   return {
     containerRef,
+    wrapperRef,
     scrollBoxRef,
     scrollX,
     scrollY,
