@@ -6,12 +6,16 @@ export const ChannelBox = styled.div<{
   theme?: Theme;
 }>`
   position: absolute;
-  height: ${({ height }) => height + 10}px;
+  height: ${({ height }) => height}px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: ${({ theme }) => theme.primary[900]};
+`;
+
+export const ChannelContent = styled.div`
+  
 `;
 
 export const ChannelLogo = styled.img`

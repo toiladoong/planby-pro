@@ -30,13 +30,15 @@ interface RowProps {
   offsetLeft?: number;
   scrollBoxRef?: any;
   loading?: boolean;
+  channelId?: string;
 }
 
 export function Row({
   isRTL = false,
   isScrollBar,
   isScrollToNow,
-  loading,
+  // channelId,
+  // loading,
   width,
   height,
   position,
@@ -58,12 +60,13 @@ export function Row({
   const liveProgram = getLiveProgram?.(programs);
   const firstProgram = programs[0];
   const lastProgram = programs[programs.length - 1];
+  const isSkeleton = !!programs.find(program => program?.data?.skeleton);
 
   if (!width) {
     width = programs.length * itemWidth;
   }
 
-  const { scrollBoxRef, ...layoutProps } = useRow({
+  const { wrapperRef, scrollBoxRef, ...layoutProps } = useRow({
     containerRef,
     scrollBoxRef: customScrollBoxRef,
     width,
@@ -79,7 +82,8 @@ export function Row({
     lastProgram,
     onReachBeginning,
     onReachEnd,
-    layoutWidth
+    layoutWidth,
+    isSkeleton
   });
 
   const { scrollX, onScroll, onScrollLeft, onScrollRight, scrollTo } = layoutProps;
@@ -91,25 +95,32 @@ export function Row({
     }
   }, [offsetLeft])
 
+  const isShowArrow = width > layoutWidth;
+
   return (
     <Wrapper
+      ref={wrapperRef}
       style={{
         ...position
       }}
     >
-      <ArrowPrev
-        className="arrow arrow-prev"
-        onClick={() => {
-          console.log('ArrowPrev')
-          onScrollLeft()
-        }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             className="lucide lucide-chevron-left">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-      </ArrowPrev>
+      {
+        isShowArrow
+        &&
+        <ArrowPrev
+          className="arrow arrow-prev"
+          onClick={() => {
+            console.log('ArrowPrev')
+            onScrollLeft()
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               className="lucide lucide-chevron-left">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+        </ArrowPrev>
+      }
       <ScrollBox
         isRTL={isRTL}
         isScrollBar={isScrollBar}
@@ -135,19 +146,23 @@ export function Row({
           }
         </RowBox>
       </ScrollBox>
-      <ArrowNext
-        className="arrow arrow-next"
-        onClick={() => {
-          console.log('ArrowNext')
-          onScrollRight()
-        }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             className="lucide lucide-chevron-right">
-          <path d="m9 18 6-6-6-6"/>
-        </svg>
-      </ArrowNext>
+      {
+        isShowArrow
+        &&
+        <ArrowNext
+          className="arrow arrow-next"
+          onClick={() => {
+            console.log('ArrowNext')
+            onScrollRight()
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               className="lucide lucide-chevron-right">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </ArrowNext>
+      }
     </Wrapper>
   );
 }

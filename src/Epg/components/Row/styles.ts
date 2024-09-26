@@ -12,6 +12,20 @@ export const Wrapper = styled.div<{
             opacity: 1;
         }
     }
+
+    &[data-state="beginning"] {
+        .arrow-prev {
+            visibility: hidden;
+            pointer-events: none;
+        }
+    }
+
+    &[data-state="end"] {
+        .arrow-next {
+            visibility: hidden;
+            pointer-events: none;
+        }
+    }
 `;
 
 export const RowBox = styled.div<{
@@ -19,7 +33,6 @@ export const RowBox = styled.div<{
   theme?: Theme;
 }>`
     //position: absolute;
-    background: ${({ theme }) => theme.primary[900]};
     height: ${({ height }) => height}px;
 `;
 
@@ -31,33 +44,42 @@ export const ScrollBox = styled.div<{ theme?: Theme; isRTL?: boolean; isScrollBa
     //overflow-y: hidden;
     //scroll-behavior: smooth;
     height: ${({ height, theme, isScrollBar }) => `${isScrollBar ? height + (theme.scrollbar.size || 0) : height}px`};
-    background: ${({ theme }) => theme.primary[900]};
 
     ${({ isRTL }) => isRTL && `transform: scale(-1,1)`};
+
+    :hover {
+        ::-webkit-scrollbar-thumb {
+            background: ${({ theme }) => theme.scrollbar.thumb.bg};
+        }
+    }
 
     ::-webkit-scrollbar {
         width: ${({ isScrollBar, theme }) => isScrollBar ? `${theme.scrollbar.size}px` : 0};
         height: ${({ isScrollBar, theme }) => isScrollBar ? `${theme.scrollbar.size}px` : 0};
+        background: transparent;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: ${({ theme }) => theme.scrollbar.thumb.bg};
+        background: transparent;
         border: 10px none ${({ theme }) => theme.white};
         border-radius: 20px;
-    }
+        transition: background 0.15s;
 
-    ::-webkit-scrollbar-thumb:hover {
-        background: ${({ theme }) => theme.white};
+        :hover {
+            background: ${({ theme }) => theme.white};
+        }
     }
 
     ::-webkit-scrollbar-track {
-        background: ${({ theme }) => theme.primary[900]};
+            //background: ${({ theme }) => theme.primary[900]};
+        background: transparent;
         border: 22px none ${({ theme }) => theme.white};
         border-radius: 0;
     }
 
     ::-webkit-scrollbar-corner {
-        background: ${({ theme }) => theme.primary[900]};
+            //background: ${({ theme }) => theme.primary[900]};
+        background: transparent;
     }
 `;
 

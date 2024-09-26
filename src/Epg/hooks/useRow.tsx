@@ -30,6 +30,7 @@ interface useRowProps {
   onReachBeginning?: (params: any) => void;
   onReachEnd?: (params: any) => void;
   scrollBoxRef?: any;
+  isSkeleton?: boolean;
 }
 
 function scrollToWithCallback({ element, left, callback }: { element: any, left: number, callback: () => void }) {
@@ -67,10 +68,12 @@ export function useRow({
   lastProgram,
   onReachBeginning,
   onReachEnd,
-  scrollBoxRef
+  scrollBoxRef,
+  isSkeleton
 }: useRowProps) {
   const useIsomorphicEffect = useIsomorphicLayoutEffect();
 
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
   const scrollBoxDefaultRef = React.useRef<HTMLDivElement>(null);
 
   if (!scrollBoxRef) {
@@ -95,23 +98,37 @@ export function useRow({
 
   const handleOnScroll = React.useCallback(
     (e: React.UIEvent<HTMLDivElement, UIEvent> & { target: Element }) => {
-      let y;
-      let x;
+      let scrollTop;
+      let scrollLeft;
 
       if (scrollBoxRef?.current) {
-        y = scrollBoxRef.current.scrollTop;
-        x = scrollBoxRef.current.scrollLeft;
+        scrollTop = scrollBoxRef.current.scrollTop;
+        scrollLeft = scrollBoxRef.current.scrollLeft;
       } else {
-        y = e.target.scrollTop;
-        x = e.target.scrollLeft
+        scrollTop = e.target.scrollTop;
+        scrollLeft = e.target.scrollLeft
+      }
+
+      console.log('scrollLeft', scrollLeft);
+
+      if (wrapperRef?.current) {
+        if (scrollLeft <= 0) {
+          wrapperRef.current.setAttribute('data-state', 'beginning');
+        } else {
+          if (scrollLeft >= (width - layoutWidth)) {
+            wrapperRef.current.setAttribute('data-state', 'end');
+          } else {
+            wrapperRef.current.removeAttribute('data-state');
+          }
+        }
       }
 
       handleScrollDebounced({
-        y,
-        x
+        y: scrollTop,
+        x: scrollLeft
       });
     },
-    [handleScrollDebounced]
+    [handleScrollDebounced, width, layoutWidth]
   );
 
   const handleOnScrollToNow = React.useCallback(() => {
@@ -165,19 +182,26 @@ export function useRow({
           left = scrollBoxRef.current.scrollLeft - itemWidth * 2;
         }
 
-        console.log('handleOnScrollLeft', left)
+        // console.log('handleOnScrollLeft', left)
 
-        scrollToWithCallback({
-          element: scrollBoxRef.current,
-          left: Math.max(0, left),
-          callback: () => {
-            if (left <= 0) {
-              onReachBeginning?.({
-                firstProgram
-              });
+        if (onReachBeginning) {
+          scrollToWithCallback({
+            element: scrollBoxRef.current,
+            left: Math.max(0, left),
+            callback: () => {
+              if (left <= 0) {
+                onReachBeginning?.({
+                  firstProgram
+                });
+              }
             }
-          }
-        })
+          })
+        } else {
+          scrollBoxRef.current.scrollTo({
+            left,
+            behavior: 'smooth'
+          });
+        }
       }
     }, [width, firstProgram]);
 
@@ -221,14 +245,15 @@ export function useRow({
 
   // -------- Effects --------
   useIsomorphicEffect(() => {
-    if (scrollBoxRef?.current && isToday && isScrollToNow && !scrollToNowRef.current) {
+    if (scrollBoxRef?.current && isToday && isScrollToNow && !scrollToNowRef.current && !isSkeleton) {
       handleOnScrollToNow();
       scrollToNowRef.current = true;
     }
-  }, [height, width, startDate, isToday, isScrollToNow, handleOnScrollToNow, liveProgram]);
+  }, [height, width, isToday, isSkeleton, isScrollToNow, handleOnScrollToNow, liveProgram]);
 
   return {
     containerRef,
+    wrapperRef,
     scrollBoxRef,
     scrollX,
     scrollY,
