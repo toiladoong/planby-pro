@@ -135,8 +135,9 @@ export function useRow({
     [handleScrollDebounced, width, layoutWidth]
   );
 
-  const handleOnScrollToNow = React.useCallback(() => {
+  const handleOnScrollToNow = React.useCallback((params = {}) => {
     if (scrollBoxRef?.current && isToday) {
+      const { behavior = 'auto' } = params;
       // const clientWidth = (width ?? containerRef.current?.clientWidth) as number;
 
       const newDate = new Date();
@@ -158,7 +159,7 @@ export function useRow({
 
       scrollBoxRef.current.scrollTo({
         left: scrollPosition,
-        behavior: 'auto'
+        behavior
       });
     }
   }, [isToday, startDate, endDate, width, sidebarWidth, hourWidth, liveProgram]);
@@ -181,7 +182,11 @@ export function useRow({
         if (value) {
           left = scrollBoxRef.current.scrollLeft - value;
         } else {
-          left = scrollBoxRef.current.scrollLeft - itemWidth * 2;
+          const step = Math.floor((layoutWidth - sidebarWidth) / itemWidth);
+
+          // console.log('step prev', step)
+
+          left = Math.round((scrollBoxRef.current.scrollLeft - itemWidth * step) / itemWidth) * itemWidth;
         }
 
         // console.log('handleOnScrollLeft', left)
@@ -205,7 +210,7 @@ export function useRow({
           });
         }
       }
-    }, [width, firstProgram]);
+    }, [width, layoutWidth, sidebarWidth, firstProgram]);
 
   const handleOnScrollRight = React.useCallback(
     (value?: number) => {
@@ -215,7 +220,11 @@ export function useRow({
         if (value) {
           right = scrollBoxRef.current.scrollLeft + value;
         } else {
-          right = scrollBoxRef.current.scrollLeft + itemWidth * 2;
+          const step = Math.floor((layoutWidth - sidebarWidth) / itemWidth);
+
+          // console.log('step next', step)
+
+          right = Math.round((scrollBoxRef.current.scrollLeft + itemWidth * step) / itemWidth) * itemWidth;
         }
 
         // console.log('handleOnScrollRight', right, width - layoutWidth)
@@ -244,6 +253,25 @@ export function useRow({
         })
       }
     }, []);
+
+  const handleKeyPress = React.useCallback((e: any) => {
+    if (e.which === 37) {
+      // left
+      handleOnScrollLeft()
+    }
+
+    if (e.which === 39) {
+      // right
+      handleOnScrollRight()
+    }
+
+    if (e.which === 76) {
+      // l
+      handleOnScrollToNow({
+        behavior: 'smooth'
+      })
+    }
+  }, [width, layoutWidth, sidebarWidth, isToday]);
 
   // -------- Effects --------
   useIsomorphicEffect(() => {
@@ -277,5 +305,6 @@ export function useRow({
     onScrollLeft: handleOnScrollLeft,
     onScrollRight: handleOnScrollRight,
     scrollTo: handleScrollTo,
+    onKeyPress: handleKeyPress,
   };
 }

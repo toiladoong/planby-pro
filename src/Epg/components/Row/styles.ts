@@ -39,7 +39,8 @@ export const RowBox = styled.div<{
 export const ScrollBox = styled.div<{ theme?: Theme; isRTL?: boolean; isScrollBar?: boolean; height: number }>`
     position: relative;
     width: 100%;
-    overflow: auto;
+    overflow: hidden;
+    //overflow: auto;
     //overflow-x: auto;
     //overflow-y: hidden;
     //scroll-behavior: smooth;

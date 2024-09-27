@@ -33,6 +33,7 @@ interface RenderTimeline {
 interface LayoutProps {
   programs: ProgramItem[];
   channels: ChannelWithPosition[];
+  layoutKey?: string;
   programObj?: {
     [key: string]: {
       position: { top: number },
@@ -90,7 +91,7 @@ const { ScrollBox, RowContent, Content } = EpgStyled;
 
 export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
   (props, scrollBoxRef) => {
-    const { channels, programs, programObj = {}, startDate, endDate, scrollY } = props;
+    const { layoutKey, channels, programs, programObj = {}, startDate, endDate, scrollY } = props;
     const {
       layoutWidth,
       layoutHeight,
@@ -257,6 +258,7 @@ export const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
 
     return (
       <ScrollBox
+        key={layoutKey}
         className="epg-layout"
         isRTL={isRTL}
         ref={scrollBoxRef}

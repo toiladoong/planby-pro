@@ -1,4 +1,4 @@
-import { differenceInMinutes, getTime, endOfDay } from "date-fns";
+import { differenceInMinutes, getTime, endOfDay, formatISO } from "date-fns";
 
 // Import interfaces
 import { Channel, Program, ProgramPosition, ChannelPosition, Theme } from "./interfaces";
@@ -13,7 +13,7 @@ import { HOUR_IN_MINUTES } from "./variables";
 import {
   formatTime,
   roundToMinutes,
-  // isYesterday as isYesterdayTime,
+  isYesterday as isYesterdayTime,
 } from "./time";
 import { getDate } from "./common";
 
@@ -117,8 +117,16 @@ export const getProgramPosition = ({
   let since = program[sinceMapKey];
   let till = program[tillMapKey];
 
-  if (!till && !nextProgram) {
+  if (!till && !nextProgram && since) {
     till = endOfDay(new Date(since));
+  }
+
+  if (!since) {
+    since = formatISO(new Date())
+  }
+
+  if (!till) {
+    till = formatISO(new Date())
   }
 
   const item = {
@@ -178,13 +186,13 @@ export const getProgramPosition = ({
     itemWidth
   });
 
-  // if (startDate) {
-  //   const isYesterday = isYesterdayTime(item.since, startDate);
-  //
-  //   if (isYesterday) {
-  //     left = 0;
-  //   }
-  // }
+  if (startDate && !itemWidth) {
+    const isYesterday = isYesterdayTime(item.since, startDate);
+
+    if (isYesterday) {
+      left = 0;
+    }
+  }
 
   // If item has negative top position, it means that it is not visible in this day
   if (top < 0) {

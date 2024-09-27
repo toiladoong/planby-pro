@@ -86,7 +86,7 @@ export function Row({
     isSkeleton
   });
 
-  const { scrollX, onScroll, onScrollLeft, onScrollRight, scrollTo } = layoutProps;
+  const { scrollX, onScroll, onScrollLeft, onScrollRight, scrollTo, onKeyPress } = layoutProps;
 
   // console.log('layoutProps Row', layoutProps)
   useEffect(() => {
@@ -99,10 +99,13 @@ export function Row({
 
   return (
     <Wrapper
+      tabIndex={1}
+      className="row-wrapper"
       ref={wrapperRef}
       style={{
         ...position
       }}
+      onKeyDown={onKeyPress}
     >
       {
         isShowArrow
@@ -129,7 +132,7 @@ export function Row({
         onScroll={onScroll}
       >
         <RowBox
-          data-testid="row"
+          className="row-box"
           height={height}
           style={{
             width

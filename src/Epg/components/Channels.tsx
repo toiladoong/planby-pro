@@ -77,7 +77,7 @@ export function Channels(props: ChannelsProps) {
 
   return (
     <Box
-      className="sidebar"
+      className="epg-sidebar"
       isRTL={isRTL}
       isTimeline={isTimeline}
       width={sidebarWidth}
